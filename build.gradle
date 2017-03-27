@@ -5,9 +5,12 @@
 // https://github.com/mshahrfar/jupiter/blob/master/LICENSE
 //
 
+apply plugin: 'application'
+apply plugin: 'eclipse'
 apply plugin: 'java'
 
 version = '0.1'
+mainClassName = 'com.mshahrfar.jupiter.JupiterMain'
 
 repositories {
     mavenCentral()
@@ -26,7 +29,7 @@ jar {
     manifest {
         attributes('Implementation-Title': 'Jupiter',
                    'Implementation-Version': version,
-                   'Main-Class': 'com.mshahrfar.jupiter.JupiterMain'
+                   'Main-Class': mainClassName
                    //'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
         )
     }
