@@ -1,0 +1,45 @@
+//
+// Jupiter: A Ride-Sharing Network Generation and Analysis Application
+// Copyright 2017 Mariam Shahrabifarahani <mshahrfar@gmail.com>
+// Released under the terms of MIT License
+// https://github.com/mshahrfar/jupiter/blob/master/LICENSE
+//
+
+apply plugin: 'java'
+
+version = '0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'log4j:log4j:1.2.17'
+}
+
+jar {
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes('Implementation-Title': 'Jupiter',
+                   'Implementation-Version': version,
+                   'Main-Class': 'com.mshahrfar.jupiter.JupiterMain'
+                   //'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
+        )
+    }
+}
+
+task myJavadocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = configurations.compile
+    destinationDir = file("./doc/")
+}
+
+clean {
+    delete "log"
+}
+
+check.dependsOn javadoc
