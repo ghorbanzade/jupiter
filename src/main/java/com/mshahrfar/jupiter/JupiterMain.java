@@ -20,6 +20,10 @@ import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
 import com.google.maps.model.TravelMode;
 
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.nio.file.Path;
+
 /**
  * Main class of Jupiter.
  *
@@ -41,7 +45,16 @@ public class JupiterMain {
         log.info("Hello from Jupiter");
         Config cfg = ConfigManager.get("config/main.properties");
 
-        String apiKey = cfg.getAsString("google.map.api.key");
+        // this should move to 
+        Path path = Paths.get(cfg.getAsString("dataset.sample.filepath"));
+        try {
+            PassengerParser passengers = new PassengerParser(path);
+            passengers.next();
+        } catch (PassengerException ex) {
+            log.error("failed to create passenger parser");
+        }
+
+        String apiKey = cfg.getAsString("google.maps.api.key");
         // context is expensive and should be declared as static var
         GeoApiContext context = new GeoApiContext().setApiKey(apiKey);
         DirectionsApiRequest request = DirectionsApi.newRequest(context);

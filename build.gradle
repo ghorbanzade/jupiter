@@ -17,8 +17,9 @@ repositories {
 }
 
 dependencies {
-    compile 'log4j:log4j:1.2.17'
     compile 'com.google.maps:google-maps-services:0.1.19'
+    compile 'log4j:log4j:1.2.17'
+    compile 'org.apache.commons:commons-csv:1.3'
 }
 
 jar {
