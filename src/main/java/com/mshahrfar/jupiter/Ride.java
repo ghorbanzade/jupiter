@@ -22,61 +22,64 @@ import java.util.List;
  */
 public final class Ride {
 
-    private static final Logger log = Logger.getLogger(PassengerParser.class);
+    private static final Logger log = Logger.getLogger(CustomerParser.class);
     private static final Config cfg = ConfigManager.get("config/main.properties");
-    private final List<Passenger> passengers;
+    private final List<Customer> customers;
 
     /**
-     * Creates a Ride object with an empty list of passengers.
+     * Creates a Ride object with an empty list of customers.
      */
     public Ride() {
-        this.passengers = new ArrayList<Passenger>(this.capacity());
+        this.customers = new ArrayList<Customer>(this.capacity());
     }
 
     /**
-     * Creates a Ride object with the given list of passengers.
+     * Creates a Ride object with the given list of customers.
      *
-     * @param passengers list of passengers to initialize the ride with.
-     * @throws PassengerException if the number of given passengers are more
+     * @param customers list of customers to initialize the ride with.
+     * @throws CustomerException if the number of given passengers are more
      *         than maximum allowed passengers in each ride.
      */
-    public Ride(Passenger... passengers) throws PassengerException {
-        this.passengers = Arrays.asList(passengers);
+    public Ride(Customer... customers) throws CustomerException {
+        this.customers = Arrays.asList(customers);
         if (this.capacity() < this.size()) {
-            throw new PassengerException("number of passengers exceeds maximum ride capacity");
+            throw new CustomerException("number of passengers exceeds maximum ride capacity");
         }
     }
 
     /**
      *
      *
-     * @param passengers
-     * @throws PassengerException if the total number of passengers in the
-     *         resulting list exceeds the maximum number of passengers allowed
+     * @param customers
+     * @throws CustomerException if the total number of passengers in this
+     *         ride exceeds the maximum number of passengers allowed
      *         in each ride.
-     * @return a new Ride object that contains passengers of this ride as well
-     *         as the given list of passengers.
+     * @return a new Ride object that contains customers of this ride as well
+     *         as the given list of customers.
      */
-    public Ride with(Passenger... passengers) throws PassengerException {
-        Ride ride = new Ride(this.passengers.toArray(new Passenger[this.size()]));
-        ride.add(passengers);
+    public Ride with(Customer... customers) throws CustomerException {
+        Ride ride = new Ride(this.customers.toArray(new Customer[this.size()]));
+        ride.add(customers);
         return ride;
     }
 
     /**
      *
      *
-     * @param passengers passengers to be added to the list of passengers
+     * @param customers customers to be added to the list of customers
      *        in this ride.
-     * @throws PassengerException if the total number of passengers exceeds the
+     * @throws CustomerException if the total number of passengers exceeds the
      *         maximum number of passengers allowed in each ride.
      */
-    public void add(Passenger... passengers) throws PassengerException {
-        List<Passenger> list = Arrays.asList(passengers);
-        if (this.capacity() < this.size() + list.size()) {
-            throw new PassengerException("number of passengers exceeds maximum ride capacity");
+    public void add(Customer... customers) throws CustomerException {
+        int num = this.size();
+        for (Customer customer: customers) {
+            num += customer.countPassengers();
         }
-        this.passengers.addAll(list);
+        if (this.capacity() < num) {
+            throw new CustomerException("number of passengers exceeds maximum ride capacity");
+        }
+        this.customers.addAll(Arrays.asList(customers));
     }
 
     /**
@@ -94,7 +97,11 @@ public final class Ride {
      * @return current number of passengers in this ride
      */
     public int size() {
-        return this.passengers.size();
+        int num = 0;
+        for (Customer customer: this.customers) {
+            num += customer.countPassengers();
+        }
+        return num;
     }
 
 }

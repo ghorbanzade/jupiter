@@ -13,19 +13,19 @@ import org.apache.log4j.Logger;
  *
  *
  * @author Pejman Ghorbanzade
- * @see PassengerParser
- * @see Passenger
+ * @see CustomerParser
+ * @see Customer
  */
-public final class PassengerException extends RuntimeException {
+public final class CustomerException extends RuntimeException {
 
-    private static final Logger log = Logger.getLogger(PassengerException.class);
+    private static final Logger log = Logger.getLogger(CustomerException.class);
 
     /**
      *
      *
      * @param ex explanation for why the exception is thrown
      */
-    public PassengerException(String ex) {
+    public CustomerException(String ex) {
         log.error(ex);
     }
 

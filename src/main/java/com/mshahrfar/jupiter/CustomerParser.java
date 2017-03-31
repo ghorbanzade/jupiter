@@ -27,51 +27,51 @@ import java.util.Date;
  *
  * @author Pejman Ghorbanzade
  */
-public final class PassengerParser {
+public final class CustomerParser {
 
-    private static final Logger log = Logger.getLogger(PassengerParser.class);
+    private static final Logger log = Logger.getLogger(CustomerParser.class);
     private static Iterator<CSVRecord> recordIterator;
 
     /**
      * Creates a parser to read records of the dataset in the given path.
      *
      * @param path path to the dataset
-     * @throws PassengerException if we fail to open dataset with given path
+     * @throws CustomerException if we fail to open dataset with given path
      */
-    public PassengerParser(Path path) throws PassengerException {
+    public CustomerParser(Path path) throws CustomerException {
         try {
             CSVFormat format = CSVFormat.EXCEL.withFirstRecordAsHeader();
             Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8);
             CSVParser parser = new CSVParser(reader, format);
             recordIterator = parser.iterator();
         } catch (IOException ex) {
-            throw new PassengerException("failed to open passenger dataset");
+            throw new CustomerException("failed to open customer dataset");
         }
     }
 
     /**
      * Checks whether dataset has any remaining record to be read.
      *
-     * @return true if parser still has passengers to parse
+     * @return true if parser still has customers to parse
      */
     public boolean hasNext() {
         return recordIterator.hasNext();
     }
 
     /**
-     * Reads a new record from dataset and creates a Passenger object based on
+     * Reads a new record from dataset and creates a Customer object based on
      * its inforamtion.
      *
-     * @return next passenger in the dataset or null if none remains
-     * @throws PassengerException if there are no more passengers.
+     * @return next customers in the dataset or null if none remains
+     * @throws CustomerException if there are no more customers.
      *         A good client always checks hasNext() before calling
      *         this function.
      */
-    public Passenger next() throws PassengerException {
+    public Customer next() throws CustomerException {
         if (recordIterator.hasNext()) {
-            return new Passenger(recordIterator.next());
+            return new Customer(recordIterator.next());
         }
-        throw new PassengerException("dataset has no more passengers");
+        throw new CustomerException("dataset has no more customers");
     }
 
 }

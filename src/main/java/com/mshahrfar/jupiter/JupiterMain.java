@@ -48,10 +48,10 @@ public class JupiterMain {
         // this should move to 
         Path path = Paths.get(cfg.getAsString("dataset.sample.filepath"));
         try {
-            PassengerParser passengers = new PassengerParser(path);
-            passengers.next();
-        } catch (PassengerException ex) {
-            log.error("failed to create passenger parser");
+            CustomerParser customers = new CustomerParser(path);
+            customers.next();
+        } catch (CustomerException ex) {
+            log.error("failed to create customer parser");
         }
 
         String apiKey = cfg.getAsString("google.maps.api.key");
