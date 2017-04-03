@@ -24,8 +24,8 @@ public final class RideException extends RuntimeException {
      *
      * @param ex explanation for why the exception is thrown
      */
-    public RideException(String ex) {
-        log.error(ex);
+    public RideException(String exp) {
+        super(exp);
     }
 
 }
