@@ -9,11 +9,21 @@ package com.mshahrfar.jupiter;
 
 import org.apache.log4j.Logger;
 
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsLeg;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
+import com.google.maps.model.TravelMode;
 
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -24,7 +34,11 @@ public final class Ride {
 
     private static final Logger log = Logger.getLogger(CustomerParser.class);
     private static final Config cfg = ConfigManager.get("config/main.properties");
+    private static final GeoApiContext context = new GeoApiContext().setApiKey(
+        cfg.getAsString("google.maps.api.key")
+    );
     private final List<Customer> customers;
+    private final Map<String, Long> info = new HashMap<String, Long>();
 
     /**
      * Creates a Ride object with an empty list of customers.
@@ -41,7 +55,7 @@ public final class Ride {
      *         than maximum allowed passengers in each ride.
      */
     public Ride(Customer... customers) throws CustomerException {
-        this.customers = Arrays.asList(customers);
+        this.customers = new ArrayList<Customer>(Arrays.asList(customers));
         if (this.capacity() < this.size()) {
             throw new CustomerException("number of passengers exceeds maximum ride capacity");
         }
@@ -102,6 +116,61 @@ public final class Ride {
             num += customer.countPassengers();
         }
         return num;
+    }
+
+    /**
+     *
+     *
+     *
+     */
+    public void process() {
+        DirectionsApiRequest request = DirectionsApi.newRequest(context);
+        request.origin(new LatLng(40.644737, -73.781937));
+        request.destination(new LatLng(40.811108, -73.957993));
+        request.mode(TravelMode.DRIVING);
+        try {
+            DirectionsResult result = request.await();
+            if (0 == result.routes.length) {
+                return;
+            }
+            DirectionsRoute route = result.routes[0];
+            long distance = 0;
+            long duration = 0;
+            for (DirectionsLeg leg: route.legs) {
+                distance += leg.distance.inMeters;
+                duration += leg.duration.inSeconds;
+            }
+            this.info.put("distance", distance);
+            this.info.put("duration", duration);
+        } catch (ApiException exp) {
+            log.error(exp.getMessage());
+        } catch (Exception exp) {
+            log.error(exp.getMessage());
+        }
+    }
+
+    /**
+     *
+     *
+     * @return distance in meters to complete this ride
+     */
+    public long getDistance() {
+        if (!this.info.containsKey("distance")) {
+            this.process();
+        }
+        return this.info.get("distance");
+    }
+
+    /**
+     *
+     *
+     * @return duration in seconds to complete this ride
+     */
+    public long getDuration() {
+        if (!this.info.containsKey("duration")) {
+            this.process();
+        }
+        return this.info.get("duration");
     }
 
 }

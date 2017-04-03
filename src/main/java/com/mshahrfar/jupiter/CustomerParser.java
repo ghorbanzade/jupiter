@@ -30,6 +30,7 @@ import java.util.Date;
 public final class CustomerParser {
 
     private static final Logger log = Logger.getLogger(CustomerParser.class);
+    private static CSVParser parser;
     private static Iterator<CSVRecord> recordIterator;
 
     /**
@@ -42,7 +43,7 @@ public final class CustomerParser {
         try {
             CSVFormat format = CSVFormat.EXCEL.withFirstRecordAsHeader();
             Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8);
-            CSVParser parser = new CSVParser(reader, format);
+            parser = new CSVParser(reader, format);
             recordIterator = parser.iterator();
         } catch (IOException ex) {
             throw new CustomerException("failed to open customer dataset");
@@ -72,6 +73,20 @@ public final class CustomerParser {
             return new Customer(recordIterator.next());
         }
         throw new CustomerException("dataset has no more customers");
+    }
+
+    /**
+     * Cleans up parser resources. Client is expected to call this method
+     * when it is done with the dataset.
+     */
+    public void close() {
+        if (!parser.isClosed()) {
+            try {
+                parser.close();
+            } catch (IOException ex) {
+                log.warn(ex.getMessage());
+            }
+        }
     }
 
 }

@@ -9,18 +9,6 @@ package com.mshahrfar.jupiter;
 
 import org.apache.log4j.Logger;
 
-// should be moved to another class
-import com.google.maps.DirectionsApi;
-import com.google.maps.DirectionsApiRequest;
-import com.google.maps.GeoApiContext;
-import com.google.maps.errors.ApiException;
-import com.google.maps.model.DirectionsLeg;;
-import com.google.maps.model.DirectionsResult;
-import com.google.maps.model.DirectionsRoute;
-import com.google.maps.model.LatLng;
-import com.google.maps.model.TravelMode;
-
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 
@@ -45,38 +33,16 @@ public class JupiterMain {
         log.info("Hello from Jupiter");
         Config cfg = ConfigManager.get("config/main.properties");
 
-        // this should move to 
         Path path = Paths.get(cfg.getAsString("dataset.sample.filepath"));
         try {
             CustomerParser customers = new CustomerParser(path);
-            customers.next();
+            Customer customerA = customers.next();
+            Customer customerB = customers.next();
+            Ride ride = new Ride(customerA);
+            log.info(ride.with(customerB).getDuration());
+            customers.close();
         } catch (CustomerException ex) {
             log.error("failed to create customer parser");
-        }
-
-        String apiKey = cfg.getAsString("google.maps.api.key");
-        // context is expensive and should be declared as static var
-        GeoApiContext context = new GeoApiContext().setApiKey(apiKey);
-        DirectionsApiRequest request = DirectionsApi.newRequest(context);
-        request.origin(new LatLng(40.644737, -73.781937));
-        request.destination(new LatLng(40.811108, -73.957993));
-        request.mode(TravelMode.DRIVING);
-        try {
-            DirectionsResult result = request.await();
-            for (DirectionsRoute route: result.routes) {
-                long distance = 0;
-                long duration = 0;
-                for (DirectionsLeg leg: route.legs) {
-                    duration += leg.duration.inSeconds;
-                    distance += leg.distance.inMeters;
-                }
-                log.info("total duration is " + duration);
-                log.info("total distance is " + distance);
-            }
-        } catch (ApiException exp) {
-            log.error(exp.getMessage());
-        } catch (Exception exp) {
-            log.error(exp.getMessage());
         }
 
     }

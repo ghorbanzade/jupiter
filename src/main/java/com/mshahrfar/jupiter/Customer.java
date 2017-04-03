@@ -106,4 +106,24 @@ public final class Customer {
         return (int) info.get("passenger_count");
     }
 
+    /**
+     *
+     *
+     * @return true if pickup location of the given customer is not too far from
+     *         pickup location of this customer
+     */
+    public boolean canRideWith(Customer candidate) {
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @return a description of this customer
+     */
+    @Override
+    public String toString() {
+        return info.toString();
+    }
+
 }
