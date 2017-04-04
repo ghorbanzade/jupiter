@@ -7,8 +7,6 @@
 
 package com.mshahrfar.jupiter;
 
-import org.apache.log4j.Logger;
-
 /**
  *
  *
@@ -17,12 +15,10 @@ import org.apache.log4j.Logger;
  */
 public final class RideException extends RuntimeException {
 
-    private static final Logger log = Logger.getLogger(RideException.class);
-
     /**
      *
      *
-     * @param ex explanation for why the exception is thrown
+     * @param exp explanation for why the exception is thrown
      */
     public RideException(String exp) {
         super(exp);

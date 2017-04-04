@@ -26,7 +26,7 @@ public final class CustomerException extends RuntimeException {
      * @param ex explanation for why the exception is thrown
      */
     public CustomerException(String ex) {
-        log.error(ex);
+        super(ex);
     }
 
 }

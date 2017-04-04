@@ -1,15 +1,46 @@
-/**
- * 
- */
+//
+// Jupiter: A Ride-Sharing Network Generation and Analysis Application
+// Copyright 2017 Mariam Shahrabifarahani <mshahrfar@gmail.com>
+// Released under the terms of MIT License
+// https://github.com/mshahrfar/jupiter/blob/master/LICENSE
+//
+
 package com.mshahrfar.jupiter;
 
+import java.util.List;
+
 /**
- * @author mshah
  *
+ * @author Mariam Shahrabifarahanai
  */
-public abstract class InputRule {
-	public InputRule () {
-		
-	}
-	private List<Customer> list;
+public interface InputRule {
+
+    /**
+     *
+     *
+     * @return
+     */
+    public boolean hasCustomer();
+
+    /**
+     *
+     *
+     * @return
+     */
+    public Customer nextCustomer();
+
+    /**
+     *
+     *
+     * @return
+     */
+    public List<Customer> getCandidates();
+
+    /**
+     *
+     *
+     * @param
+     */
+    public void addFilter(Filter filter);
+
 }

@@ -15,8 +15,8 @@ import java.util.Comparator;
 * distance of each.
 *
 * @author   Pejman Ghorbanzade
+* @see      DurationComparator
 * @see      Ride
-* @see      Customer
 */
 public class DistanceComparator implements Comparator<Ride>, Serializable {
 

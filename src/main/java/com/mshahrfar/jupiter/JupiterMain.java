@@ -37,33 +37,38 @@ public class JupiterMain {
         log.info("Hello from Jupiter");
         Config cfg = ConfigManager.get("config/main.properties");
 
-        Path path = Paths.get(cfg.getAsString("dataset.sample.filepath"));
-        try {
-            CustomerParser parser = new CustomerParser(path);
-            Customer customer = parser.next();
-            Customer candidateA = parser.next();
-            Customer candidateB = parser.next();
-            Customer candidateC = parser.next();
-            List<Customer> candidates = new ArrayList<Customer>();
-            candidates.add(candidateA);
-            candidates.add(candidateB);
-            candidates.add(candidateC);
+        InputRule rule = new TimeWindowRule(
+            new DatasetParser(Paths.get(cfg.getAsString("dataset.sample.filepath"))),
+            cfg.getAsInt("time.window.bound.low"),
+            cfg.getAsInt("time.window.bound.high")
+        );
+        rule.addFilter(new VicinityFilter(cfg.getAsInt("vicinity")));
+        rule.addFilter(new RideCapacityFilter(cfg.getAsInt("ride.capacity")));
 
-            Ride ride = new Ride(customer);
-            List<Ride> rides = new ArrayList<Ride>();
-            for (Customer candidate: candidates) {
-                try {
-                    rides.add(ride.with(candidate));
-                } catch (RideException exp) {
-                    log.warn(exp.getMessage());
-                    continue;
-                }
+        while (rule.hasCustomer()) {
+            Customer customer = rule.nextCustomer();
+            List<Customer> candidates = rule.getCandidates();
+            log.info(String.format(
+                "found %3d candidates to ride with customer %4d",
+                candidates.size(), customer.getId()
+            ));
+            try {
+                Ride ride = new Ride(customer);
+                List<Ride> rides = new ArrayList<Ride>();
+                //for (Customer candidate: candidates) {
+                //    try {
+                //        rides.add(ride.with(candidate));
+                //    } catch (RideException ex) {
+                //        log.warn(ex.getMessage());
+                //        continue;
+                //    }
+                //}
+                //log.info("sorting rides based on distance for customer id " + customer.getId());
+                //Collections.sort(rides, new DurationComparator());
+                //log.info("best ride is: " + rides.get(0));
+            } catch (RideException ex) {
+                log.warn(ex.getMessage());
             }
-            Collections.sort(rides, new DistanceComparator());
-            log.info("best ride is: " + rides.get(0));
-            parser.close();
-        } catch (CustomerException ex) {
-            log.error("failed to create customer parser");
         }
 
     }

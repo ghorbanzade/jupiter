@@ -60,13 +60,17 @@ public final class Customer {
             SimpleDateFormat dateParser = new SimpleDateFormat("dd/MM/yyHH:mm:ss");
             String pickupTimeStr = record.get("pickup_datetime1")
                                  + record.get("pickup_datetime2");
-            info.put("pickup_time", dateParser.parse(pickupTimeStr));
+            info.put("pickup_time", dateParser.parse(pickupTimeStr).getTime() / 1000);
 
             int passengerCount = Integer.parseInt(record.get("passenger_count"));
             info.put("passenger_count", passengerCount);
 
+            info.put("record_number", record.getRecordNumber());
+
         } catch (NumberFormatException | ParseException ex) {
-            throw new CustomerException("failed to parse passenger record");
+            throw new CustomerException(
+                "invalid passenger record: " + record.getRecordNumber()
+            );
         }
     }
 
@@ -93,8 +97,17 @@ public final class Customer {
      *
      * @return a Date object representing pickup time
      */
-    public Date getPickupTime() {
-        return (Date) info.get("pickup_time");
+    public long getPickupTime() {
+        return (long) info.get("pickup_time");
+    }
+
+    /**
+     *
+     *
+     * @return a record number assigned to customer entry in the database
+     */
+    public long getId() {
+        return (long) info.get("record_number");
     }
 
     /**
