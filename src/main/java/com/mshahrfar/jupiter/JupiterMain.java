@@ -49,25 +49,28 @@ public class JupiterMain {
             Customer customer = rule.nextCustomer();
             List<Customer> candidates = rule.getCandidates();
             log.info(String.format(
-                "found %3d candidates to ride with customer %4d",
-                candidates.size(), customer.getId()
+                "customer %d: %d candidates found",
+                customer.getId(), candidates.size()
             ));
             try {
                 Ride ride = new Ride(customer);
                 List<Ride> rides = new ArrayList<Ride>();
-                //for (Customer candidate: candidates) {
-                //    try {
-                //        rides.add(ride.with(candidate));
-                //    } catch (RideException ex) {
-                //        log.warn(ex.getMessage());
-                //        continue;
-                //    }
-                //}
-                //log.info("sorting rides based on distance for customer id " + customer.getId());
+                for (Customer candidate: candidates) {
+                    try {
+                        rides.add(ride.with(candidate));
+                    } catch (RideException ex) {
+                        log.warn(ex.getMessage());
+                        continue;
+                    }
+                }
+                log.info(String.format(
+                    "customer %d: finding best shared ride",
+                    customer.getId()
+                ));
                 //Collections.sort(rides, new DurationComparator());
                 //log.info("best ride is: " + rides.get(0));
             } catch (RideException ex) {
-                log.warn(ex.getMessage());
+                log.trace(ex.getMessage());
             }
         }
 

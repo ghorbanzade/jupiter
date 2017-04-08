@@ -57,7 +57,9 @@ public final class Ride {
     public Ride(Customer... customers) throws RideException {
         this.customers = new ArrayList<Customer>(Arrays.asList(customers));
         if (this.capacity() < this.size()) {
-            throw new RideException("number of passengers exceeds maximum ride capacity");
+            throw new RideException(
+                "number of passengers exceeds maximum ride capacity"
+            );
         }
     }
 
@@ -72,7 +74,8 @@ public final class Ride {
      *         as the given list of customers.
      */
     public Ride with(Customer... customers) throws RideException {
-        Ride ride = new Ride(this.customers.toArray(new Customer[this.size()]));
+        Customer[] customerArr = new Customer[this.customers.size()];
+        Ride ride = new Ride(this.customers.toArray(customerArr));
         ride.add(customers);
         return ride;
     }
@@ -94,6 +97,9 @@ public final class Ride {
             throw new RideException("number of passengers exceeds maximum ride capacity");
         }
         this.customers.addAll(Arrays.asList(customers));
+        // ensure that we process this ride again now that customers
+        // have changed
+        this.reset();
     }
 
     /**
@@ -106,7 +112,8 @@ public final class Ride {
     }
 
     /**
-     *
+     * Returns the number of passengers currently reserved in this ride.
+     * This value may be different than the number of customers.
      *
      * @return current number of passengers in this ride
      */
@@ -123,19 +130,19 @@ public final class Ride {
      *
      *
      */
-    public void process() {
-        DirectionsApiRequest request = DirectionsApi.newRequest(context);
-        request.origin(new LatLng(40.644737, -73.781937));
-        request.destination(new LatLng(40.811108, -73.957993));
-        request.mode(TravelMode.DRIVING);
+    public void process() throws RideException {
+        long distance = 0;
+        long duration = 0;
+        log.trace(String.format(
+            "processing ride with %d customers", this.customers.size()
+        ));
         try {
+            DirectionsApiRequest request = this.prepareRequest();
             DirectionsResult result = request.await();
             if (0 == result.routes.length) {
                 return;
             }
             DirectionsRoute route = result.routes[0];
-            long distance = 0;
-            long duration = 0;
             for (DirectionsLeg leg: route.legs) {
                 distance += leg.distance.inMeters;
                 duration += leg.duration.inSeconds;
@@ -147,6 +154,36 @@ public final class Ride {
         } catch (Exception exp) {
             log.error(exp.getMessage());
         }
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    private DirectionsApiRequest prepareRequest() {
+        DirectionsApiRequest request = DirectionsApi.newRequest(context);
+        request.mode(TravelMode.DRIVING);
+        switch (this.customers.size()) {
+            case 0:
+                throw new RideException(
+                    "nothing to process for a ride without customers"
+                );
+            case 1:
+                Customer customer = this.customers.get(0);
+                request.origin(customer.getPickupLocation());
+                request.destination(customer.getDropoffLocation());
+                // to be implemented
+                break;
+            case 2:
+                // to be implemented
+                break;
+            default:
+                throw new RideException(
+                    "rides with more than 2 customers not supported yet"
+                );
+        }
+        return request;
     }
 
     /**
@@ -181,6 +218,16 @@ public final class Ride {
     @Override
     public String toString() {
         return this.info.toString();
+    }
+
+    /**
+     *
+     *
+     *
+     */
+    private void reset() {
+        this.info.remove("duration");
+        this.info.remove("distance");
     }
 
 }
