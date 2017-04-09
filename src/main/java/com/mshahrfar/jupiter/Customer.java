@@ -36,7 +36,6 @@ public final class Customer {
      * @throws CustomerException
      */
     public Customer(CSVRecord record) throws CustomerException {
-        log.debug(record.toString());
         this.initialize(record);
     }
 
@@ -117,16 +116,6 @@ public final class Customer {
      */
     public int countPassengers() {
         return (int) info.get("passenger_count");
-    }
-
-    /**
-     *
-     *
-     * @return true if pickup location of the given customer is not too far from
-     *         pickup location of this customer
-     */
-    public boolean canRideWith(Customer candidate) {
-        return true;
     }
 
     /**

@@ -18,6 +18,7 @@ import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
 import com.google.maps.model.TravelMode;
+import org.joda.time.DateTime;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -170,12 +171,19 @@ public final class Ride {
                     "nothing to process for a ride without customers"
                 );
             case 1:
-                Customer customer = this.customers.get(0);
-                request.origin(customer.getPickupLocation());
-                request.destination(customer.getDropoffLocation());
+                request.origin(this.customers.get(0).getPickupLocation());
+                request.destination(this.customers.get(0).getDropoffLocation());
+                request.departureTime(
+                    new DateTime(this.customers.get(0).getPickupTime())
+                );
                 // to be implemented
                 break;
             case 2:
+                request.origin(this.customers.get(0).getPickupLocation());
+                request.destination(this.customers.get(0).getDropoffLocation());
+                request.departureTime(
+                    new DateTime(this.customers.get(0).getPickupTime())
+                );
                 // to be implemented
                 break;
             default:

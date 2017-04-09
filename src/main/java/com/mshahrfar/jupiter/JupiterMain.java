@@ -64,8 +64,8 @@ public class JupiterMain {
                     }
                 }
                 log.info(String.format(
-                    "customer %d: finding best shared ride",
-                    customer.getId()
+                    "customer %d: finding best shared ride among %d rides",
+                    customer.getId(), rides.size()
                 ));
                 //Collections.sort(rides, new DurationComparator());
                 //log.info("best ride is: " + rides.get(0));
