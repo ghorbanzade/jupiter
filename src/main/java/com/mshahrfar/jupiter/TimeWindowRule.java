@@ -44,8 +44,8 @@ public class TimeWindowRule implements InputRule {
         long limitHigh
     ) {
         this.parser = parser;
-        this.limitLow = limitLow;
-        this.limitHigh = limitHigh;
+        this.limitLow = limitLow * 1000;
+        this.limitHigh = limitHigh * 1000;
         this.customer = this.parser.next();
         this.candidates.add(customer);
         this.rebuild();

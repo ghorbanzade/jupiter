@@ -28,4 +28,13 @@ public final class FatalException extends RuntimeException {
     log.fatal("fatal exception in class " + cls.getSimpleName());
   }
 
+  /**
+   *
+   *
+   * @param str
+   */
+  public FatalException(String ex) {
+    super(ex);
+  }
+
 }

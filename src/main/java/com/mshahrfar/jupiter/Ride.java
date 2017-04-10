@@ -19,7 +19,9 @@ import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
 import com.google.maps.model.TravelMode;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,66 +134,117 @@ public final class Ride {
      *
      */
     public void process() throws RideException {
-        long distance = 0;
-        long duration = 0;
         log.trace(String.format(
             "processing ride with %d customers", this.customers.size()
         ));
-        try {
-            DirectionsApiRequest request = this.prepareRequest();
-            DirectionsResult result = request.await();
-            if (0 == result.routes.length) {
-                return;
-            }
-            DirectionsRoute route = result.routes[0];
-            for (DirectionsLeg leg: route.legs) {
-                distance += leg.distance.inMeters;
-                duration += leg.duration.inSeconds;
-            }
-            this.info.put("distance", distance);
-            this.info.put("duration", duration);
-        } catch (ApiException exp) {
-            log.error(exp.getMessage());
-        } catch (Exception exp) {
-            log.error(exp.getMessage());
-        }
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    private DirectionsApiRequest prepareRequest() {
-        DirectionsApiRequest request = DirectionsApi.newRequest(context);
-        request.mode(TravelMode.DRIVING);
         switch (this.customers.size()) {
             case 0:
                 throw new RideException(
                     "nothing to process for a ride without customers"
                 );
             case 1:
-                request.origin(this.customers.get(0).getPickupLocation());
-                request.destination(this.customers.get(0).getDropoffLocation());
-                request.departureTime(
-                    new DateTime(this.customers.get(0).getPickupTime())
-                );
-                // to be implemented
+                this.processDedicatedRide();
                 break;
             case 2:
-                request.origin(this.customers.get(0).getPickupLocation());
-                request.destination(this.customers.get(0).getDropoffLocation());
-                request.departureTime(
-                    new DateTime(this.customers.get(0).getPickupTime())
-                );
-                // to be implemented
+                this.processSharedRide();
                 break;
             default:
                 throw new RideException(
                     "rides with more than 2 customers not supported yet"
                 );
         }
-        return request;
+    }
+
+    /**
+     *
+     */
+    private void processDedicatedRide() {
+        long distance = 0;
+        long duration = 0;
+        DirectionsApiRequest request = DirectionsApi.newRequest(context);
+        request.mode(TravelMode.DRIVING);
+        request.departureTime(
+            this.findDepartureTime(this.customers.get(0).getPickupTime())
+        );
+        request.origin(this.customers.get(0).getPickupLocation());
+        request.destination(this.customers.get(0).getDropoffLocation());
+        DirectionsResult result = (new DirectionsFinder(cfg)).fetchResult(request);
+        if (0 == result.routes.length) {
+            return;
+        }
+        DirectionsRoute route = result.routes[0];
+        for (DirectionsLeg leg: route.legs) {
+            distance += leg.distance.inMeters;
+            duration += leg.duration.inSeconds;
+        }
+        this.info.put("distance", distance);
+        this.info.put("duration", duration);
+    }
+
+    /**
+     *
+     */
+    private void processSharedRide() {
+        long distance = 0;
+        long duration = 0;
+        long distance1 = 0;
+        long duration1 = 0;
+        long distance2 = 0;
+        long duration2 = 0;
+
+        DirectionsApiRequest request1 = DirectionsApi.newRequest(context);
+        request1.mode(TravelMode.DRIVING);
+        request1.origin(this.customers.get(0).getPickupLocation());
+        request1.departureTime(
+            this.findDepartureTime(this.customers.get(0).getPickupTime())
+        );
+        request1.destination(this.customers.get(0).getDropoffLocation());
+        LatLng[] wp1 = {
+            this.customers.get(1).getPickupLocation(),
+            this.customers.get(1).getDropoffLocation()
+        };
+        request1.waypoints(wp1);
+
+        DirectionsApiRequest request2 = DirectionsApi.newRequest(context);
+        request2.mode(TravelMode.DRIVING);
+        request2.origin(this.customers.get(0).getPickupLocation());
+        request2.departureTime(
+            this.findDepartureTime(this.customers.get(0).getPickupTime())
+        );
+        request2.destination(this.customers.get(1).getDropoffLocation());
+        LatLng[] wp2 = {
+            this.customers.get(1).getPickupLocation(),
+            this.customers.get(0).getDropoffLocation()
+        };
+        request2.waypoints(wp2);
+
+        DirectionsResult result1 = (new DirectionsFinder(cfg)).fetchResult(request1);
+
+        if (0 == result1.routes.length) {
+            return;
+        }
+        DirectionsRoute route1 = result1.routes[0];
+        for (DirectionsLeg leg: route1.legs) {
+            distance1 += leg.distance.inMeters;
+            duration1 += leg.duration.inSeconds;
+        }
+
+        DirectionsResult result2 = (new DirectionsFinder(cfg)).fetchResult(request2);
+
+        if (0 == result2.routes.length) {
+            return;
+        }
+        DirectionsRoute route2 = result2.routes[0];
+        for (DirectionsLeg leg: route2.legs) {
+            distance2 += leg.distance.inMeters;
+            duration2 += leg.duration.inSeconds;
+        }
+
+        distance = Math.min(distance1, distance2);
+        duration = Math.min(duration1, duration2);
+
+        this.info.put("distance", distance);
+        this.info.put("duration", duration);
     }
 
     /**
@@ -221,6 +274,15 @@ public final class Ride {
     /**
      *
      *
+     * @return
+     */
+    public List<Customer> getCustomers() {
+        return this.customers;
+    }
+
+    /**
+     *
+     *
      *
      */
     @Override
@@ -236,6 +298,23 @@ public final class Ride {
     private void reset() {
         this.info.remove("duration");
         this.info.remove("distance");
+    }
+
+    /**
+     *
+     *
+     * @param the number of seconds since January 1, 1970, 00:00:00 GMT
+     *              represented by this date
+     * @return a DateTime object in the future that has the same time as
+     *               the given unix time
+     */
+    private DateTime findDepartureTime(long epoch) {
+        DateTime ret = new DateTime(epoch);
+        ret = ret.withDate(LocalDate.now());
+        if (ret.isBeforeNow()) {
+            ret = ret.plusDays(1);
+        }
+        return ret;
     }
 
 }
