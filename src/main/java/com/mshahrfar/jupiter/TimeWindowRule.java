@@ -133,4 +133,16 @@ public class TimeWindowRule implements InputRule {
         this.filters.add(filter);
     }
 
+    /**
+     *
+     *
+     *
+     * @param candidate
+     */
+    public void excludeCandidate(Customer candidate) {
+        if (!this.candidates.remove(candidate)) {
+            log.warn("asked to remove non-existant candidate");
+        }
+    }
+
 }

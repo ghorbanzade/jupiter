@@ -43,4 +43,11 @@ public interface InputRule {
      */
     public void addFilter(Filter filter);
 
+    /**
+     *
+     *
+     * @param candidate
+     */
+    public void excludeCandidate(Customer candidate);
+
 }
