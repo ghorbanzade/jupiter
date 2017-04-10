@@ -29,21 +29,27 @@ public class JupiterMain {
     /**
      *
      *
-     * @param args command line arguments
-     *             jupiter does not support any command line argument
-     *             at the moment
+     * @param args command line arguments. Jupiter does not support any
+     *             command line argument at the moment.
      */
     public static void main(String[] args) {
         log.info("Hello from Jupiter");
         Config cfg = ConfigManager.get("config/main.properties");
 
         InputRule rule = new TimeWindowRule(
-            new DatasetParser(Paths.get(cfg.getAsString("dataset.sample.filepath"))),
+            new DatasetParser(Paths.get(
+                cfg.getAsString("dataset.sample.filepath")
+            )),
             cfg.getAsInt("time.window.bound.low"),
             cfg.getAsInt("time.window.bound.high")
         );
-        rule.addFilter(new VicinityFilter(cfg.getAsInt("vicinity")));
-        rule.addFilter(new RideCapacityFilter(cfg.getAsInt("ride.capacity")));
+
+        rule.addFilter(new VicinityFilter(
+            cfg.getAsInt("vicinity")
+        ));
+        rule.addFilter(new RideCapacityFilter(
+            cfg.getAsInt("ride.capacity")
+        ));
 
         while (rule.hasCustomer()) {
             Customer customer = rule.nextCustomer();
@@ -63,12 +69,34 @@ public class JupiterMain {
                         continue;
                     }
                 }
-                log.info(String.format(
-                    "customer %d: finding best shared ride among %d rides",
-                    customer.getId(), rides.size()
-                ));
-                //Collections.sort(rides, new DurationComparator());
-                //log.info("best ride is: " + rides.get(0));
+                if (rides.isEmpty()) {
+                    log.warn("customer %d: no shared ride candidate exists");
+                } else {
+                    log.info(String.format(
+                        "customer %d: finding best shared ride among %d rides",
+                        customer.getId(), rides.size()
+                    ));
+                    Collections.sort(rides, new DurationComparator());
+                    log.info(String.format(
+                        "customer %d: found best shared ride candidate",
+                        customer.getId()
+                    ));
+                    if ((new DurationSharePolicy(rides.get(0))).pass()) {
+                        log.info(String.format(
+                            "customer %d: ride will be shared",
+                            customer.getId()
+                        ));
+                        for (Customer rider: rides.get(0).getCustomers()) {
+                            if (!rider.equals(customer)) {
+                                rule.excludeCandidate(rider);
+                                log.info(String.format(
+                                    "customer %d excluded from future considerations",
+                                    rider.getId()
+                                ));
+                            }
+                        }
+                    }
+                }
             } catch (RideException ex) {
                 log.trace(ex.getMessage());
             }

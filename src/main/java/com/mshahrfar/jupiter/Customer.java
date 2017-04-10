@@ -56,10 +56,10 @@ public final class Customer {
             double dropoffLng = Double.parseDouble(record.get("dropoff_longitude"));
             info.put("dropoff_location", new LatLng(dropoffLat, dropoffLng));
 
-            SimpleDateFormat dateParser = new SimpleDateFormat("dd/MM/yyHH:mm:ss");
+            SimpleDateFormat dateParser = new SimpleDateFormat("dd/MM/yyyyHH:mm:ss");
             String pickupTimeStr = record.get("pickup_datetime1")
                                  + record.get("pickup_datetime2");
-            info.put("pickup_time", dateParser.parse(pickupTimeStr).getTime() / 1000);
+            info.put("pickup_time", dateParser.parse(pickupTimeStr).getTime());
 
             int passengerCount = Integer.parseInt(record.get("passenger_count"));
             info.put("passenger_count", passengerCount);
@@ -126,6 +126,21 @@ public final class Customer {
     @Override
     public String toString() {
         return info.toString();
+    }
+
+    /**
+     *
+     *
+     * @param obj
+     * @return
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Customer) {
+            Customer candidate = (Customer) obj;
+            return (this.getId() == candidate.getId());
+        }
+        return false;
     }
 
 }
