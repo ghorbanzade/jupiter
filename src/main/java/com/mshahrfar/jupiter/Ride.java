@@ -51,6 +51,16 @@ public final class Ride {
     }
 
     /**
+     *
+     *
+     * @param customer
+     */
+    public Ride(Customer customer) {
+        this.customers = new ArrayList<Customer>();
+        this.customers.add(customer);
+    }
+
+    /**
      * Creates a Ride object with the given list of customers.
      *
      * @param customers list of customers to initialize the ride with.
@@ -169,13 +179,12 @@ public final class Ride {
         request.origin(this.customers.get(0).getPickupLocation());
         request.destination(this.customers.get(0).getDropoffLocation());
         DirectionsResult result = (new DirectionsFinder(cfg)).fetchResult(request);
-        if (0 == result.routes.length) {
-            return;
-        }
-        DirectionsRoute route = result.routes[0];
-        for (DirectionsLeg leg: route.legs) {
-            distance += leg.distance.inMeters;
-            duration += leg.duration.inSeconds;
+        if (null != result.routes && 0 != result.routes.length) {
+            DirectionsRoute route = result.routes[0];
+            for (DirectionsLeg leg: route.legs) {
+                distance += leg.distance.inMeters;
+                duration += leg.duration.inSeconds;
+            }
         }
         this.info.put("distance", distance);
         this.info.put("duration", duration);
@@ -185,66 +194,62 @@ public final class Ride {
      *
      */
     private void processSharedRide() {
-        long distance = 0;
-        long duration = 0;
-        long distance1 = 0;
-        long duration1 = 0;
-        long distance2 = 0;
-        long duration2 = 0;
 
-        DirectionsApiRequest request1 = DirectionsApi.newRequest(context);
-        request1.mode(TravelMode.DRIVING);
-        request1.origin(this.customers.get(0).getPickupLocation());
-        request1.departureTime(
+        DirectionsApiRequest[] requests = new DirectionsApiRequest[2];
+        DirectionsResult[] results = new DirectionsResult[2];
+        long[] totalDurations = new long[2];
+        long[] totalDistances = new long[2];
+
+        // Case 1: P1 -> P2 -> D2 -> D1
+        requests[0] = DirectionsApi.newRequest(context);
+        requests[0].mode(TravelMode.DRIVING);
+
+        requests[0].origin(this.customers.get(0).getPickupLocation());
+        requests[0].departureTime(
             this.findDepartureTime(this.customers.get(0).getPickupTime())
         );
-        request1.destination(this.customers.get(0).getDropoffLocation());
+        requests[0].destination(this.customers.get(0).getDropoffLocation());
         LatLng[] wp1 = {
             this.customers.get(1).getPickupLocation(),
             this.customers.get(1).getDropoffLocation()
         };
-        request1.waypoints(wp1);
+        requests[0].waypoints(wp1);
 
-        DirectionsApiRequest request2 = DirectionsApi.newRequest(context);
-        request2.mode(TravelMode.DRIVING);
-        request2.origin(this.customers.get(0).getPickupLocation());
-        request2.departureTime(
+        // Case 2: P1 -> P2 -> D1 -> D2
+        requests[1] = DirectionsApi.newRequest(context);
+        requests[1].mode(TravelMode.DRIVING);
+
+        requests[1].origin(this.customers.get(0).getPickupLocation());
+        requests[1].departureTime(
             this.findDepartureTime(this.customers.get(0).getPickupTime())
         );
-        request2.destination(this.customers.get(1).getDropoffLocation());
+        requests[1].destination(this.customers.get(1).getDropoffLocation());
         LatLng[] wp2 = {
             this.customers.get(1).getPickupLocation(),
             this.customers.get(0).getDropoffLocation()
         };
-        request2.waypoints(wp2);
+        requests[1].waypoints(wp2);
 
-        DirectionsResult result1 = (new DirectionsFinder(cfg)).fetchResult(request1);
-
-        if (0 == result1.routes.length) {
-            return;
-        }
-        DirectionsRoute route1 = result1.routes[0];
-        for (DirectionsLeg leg: route1.legs) {
-            distance1 += leg.distance.inMeters;
-            duration1 += leg.duration.inSeconds;
-        }
-
-        DirectionsResult result2 = (new DirectionsFinder(cfg)).fetchResult(request2);
-
-        if (0 == result2.routes.length) {
-            return;
-        }
-        DirectionsRoute route2 = result2.routes[0];
-        for (DirectionsLeg leg: route2.legs) {
-            distance2 += leg.distance.inMeters;
-            duration2 += leg.duration.inSeconds;
+        for (int i = 0; i < results.length; i++) {
+            results[i] = (new DirectionsFinder(cfg)).fetchResult(requests[i]);
+            if (null != results[i].routes && 0 != results[i].routes.length) {
+                DirectionsRoute route = results[i].routes[0];
+                for (DirectionsLeg leg: route.legs) {
+                    totalDistances[i] += leg.distance.inMeters;
+                    totalDurations[i] += leg.duration.inSeconds;
+                }
+            }
         }
 
-        distance = Math.min(distance1, distance2);
-        duration = Math.min(duration1, duration2);
+        // sort the arrays to find minimum total duration and distance
+        // sorting is not necessary and we could merge this step in the
+        // outer for loop above  but as long as array length is small
+        // we can afford sorting
+        Arrays.sort(totalDistances);
+        Arrays.sort(totalDurations);
 
-        this.info.put("distance", distance);
-        this.info.put("duration", duration);
+        this.info.put("distance", totalDistances[0]);
+        this.info.put("duration", totalDurations[0]);
     }
 
     /**

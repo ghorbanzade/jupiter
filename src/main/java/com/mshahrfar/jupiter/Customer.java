@@ -14,6 +14,7 @@ import com.google.maps.model.LatLng;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,10 +57,16 @@ public final class Customer {
             double dropoffLng = Double.parseDouble(record.get("dropoff_longitude"));
             info.put("dropoff_location", new LatLng(dropoffLat, dropoffLng));
 
-            SimpleDateFormat dateParser = new SimpleDateFormat("dd/MM/yyyyHH:mm:ss");
+            DateFormat dateParser = new SimpleDateFormat("dd/MM/yyyyHH:mm:ss");
             String pickupTimeStr = record.get("pickup_datetime1")
                                  + record.get("pickup_datetime2");
             info.put("pickup_time", dateParser.parse(pickupTimeStr).getTime());
+
+            DateFormat timeParser = new SimpleDateFormat("H:mm:ss");
+            info.put("individual_ride_duration",
+                timeParser.parse(record.get("dropoff_time")).getTime() -
+                timeParser.parse(record.get("pickup_time")).getTime()
+            );
 
             int passengerCount = Integer.parseInt(record.get("passenger_count"));
             info.put("passenger_count", passengerCount);
@@ -107,6 +114,16 @@ public final class Customer {
      */
     public long getId() {
         return (long) info.get("record_number");
+    }
+
+    /**
+     *
+     *
+     * @return number of seconds it takes for this customer to get
+     *         to his destination using NYC cabs
+     */
+    public long getIndividualRideDuration() {
+        return (long) info.get("individual_ride_duration");
     }
 
     /**

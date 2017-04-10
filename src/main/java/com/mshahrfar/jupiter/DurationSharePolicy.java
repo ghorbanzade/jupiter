@@ -14,6 +14,7 @@ package com.mshahrfar.jupiter;
  */
 public class DurationSharePolicy implements SharePolicy {
 
+    private static final Config cfg = ConfigManager.get("config/main.properties");
     private final Ride ride;
 
     /**
@@ -31,6 +32,14 @@ public class DurationSharePolicy implements SharePolicy {
      * @return
      */
     public boolean pass() {
+        for (Customer customer: this.ride.getCustomers()) {
+            if (
+              customer.getIndividualRideDuration() *
+              cfg.getAsDouble("late.factor") < this.ride.getDuration()
+            ) {
+                return false;
+            }
+        }
         return true;
     }
 

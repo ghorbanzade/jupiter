@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ public class JupiterMain {
         MongoClient mongoClient = new MongoClient("localhost" , 27017);
         MongoDatabase db = mongoClient.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("result");
-        //collection.drop();
+        db.drop();
 
         InputRule rule = new TimeWindowRule(
             new DatasetParser(Paths.get(
@@ -65,7 +66,7 @@ public class JupiterMain {
         ));
 
         //while (rule.hasCustomer()) {
-        for (int j = 0; j < 5 && rule.hasCustomer(); j++) {
+        for (int j = 0; j < 3 && rule.hasCustomer(); j++) {
             Customer customer = rule.nextCustomer();
             List<Customer> candidates = rule.getCandidates();
 
@@ -84,11 +85,8 @@ public class JupiterMain {
                         continue;
                     }
                 }
-                Ride ri;
-                if (rides.isEmpty()) {
-                    log.warn("customer %d: no shared ride candidate exists");
-                    ri = ride;
-                } else {
+                Ride ri = null;
+                if (!rides.isEmpty()) {
                     log.info(String.format(
                         "customer %d: finding best shared ride among %d rides",
                         customer.getId(), rides.size()
@@ -98,8 +96,8 @@ public class JupiterMain {
                         "customer %d: found best shared ride candidate",
                         customer.getId()
                     ));
-                    ri = rides.get(0);
                     if ((new DurationSharePolicy(rides.get(0))).pass()) {
+                        ri = rides.get(0);
                         log.info(String.format(
                             "customer %d: ride will be shared",
                             customer.getId()
@@ -107,24 +105,36 @@ public class JupiterMain {
                         for (Customer rider: rides.get(0).getCustomers()) {
                             if (!rider.equals(customer)) {
                                 rule.excludeCandidate(rider);
-                                log.info(String.format(
+                                log.warn(String.format(
                                     "customer %d excluded from future considerations",
                                     rider.getId()
                                 ));
                             }
                         }
                     }
+                } else {
+                    ri = new Ride(customer);
+                    log.warn(String.format(
+                        "customer %d: no shared ride candidate exists",
+                        customer.getId()
+                    ));
                 }
 
                 Document doc = new Document();
                 doc.put("customer_id", ri.getCustomers().get(0).getId());
-                doc.put("candidate_ids", Arrays.asList(
-                    (ri.getCustomers().size() == 2) ?
-                    ri.getCustomers().get(1).getId() : null
-                ));
+
+                List<Long> company = new ArrayList<Long>();
+                Iterator<Customer> it = ri.getCustomers().iterator();
+                if (it.hasNext()) {
+                    it.next();
+                }
+                it.forEachRemaining(c -> { company.add(c.getId()); });
+                doc.put("candidate_ids", company);
+
                 doc.put("duration_total", ri.getDuration());
                 doc.put("distance_total", ri.getDistance());
                 collection.insertOne(doc);
+
             } catch (RideException ex) {
                 log.trace(ex.getMessage());
             }
