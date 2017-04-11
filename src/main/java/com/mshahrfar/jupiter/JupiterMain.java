@@ -123,16 +123,24 @@ public class JupiterMain {
                 Document doc = new Document();
                 doc.put("customer_id", ri.getCustomers().get(0).getId());
 
-                List<Long> company = new ArrayList<Long>();
+                List<Long> riderIds = new ArrayList<Long>();
                 Iterator<Customer> it = ri.getCustomers().iterator();
                 if (it.hasNext()) {
                     it.next();
                 }
-                it.forEachRemaining(c -> { company.add(c.getId()); });
-                doc.put("candidate_ids", company);
+                it.forEachRemaining(c -> { riderIds.add(c.getId()); });
+                doc.put("rider_ids", riderIds);
 
-                doc.put("duration_total", ri.getDuration());
-                doc.put("distance_total", ri.getDistance());
+                doc.put("duration_total", (long) ri.get("duration"));
+                doc.put("distance_total", (long) ri.get("distance"));
+                doc.put("scenario", (int) ri.get("scenario"));
+
+                List<Long> candidateIds = new ArrayList<Long>();
+                candidates.iterator().forEachRemaining(
+                    c -> { candidateIds.add(c.getId()); }
+                );
+                doc.put("candidates_count", candidateIds.size());
+                doc.put("candidate_ids", candidateIds);
                 collection.insertOne(doc);
 
             } catch (RideException ex) {

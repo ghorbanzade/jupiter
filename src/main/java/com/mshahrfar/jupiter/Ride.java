@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  *
@@ -107,7 +108,9 @@ public final class Ride {
             num += customer.countPassengers();
         }
         if (this.capacity() < num) {
-            throw new RideException("number of passengers exceeds maximum ride capacity");
+            throw new RideException(
+                "number of passengers exceeds maximum ride capacity"
+            );
         }
         this.customers.addAll(Arrays.asList(customers));
         // ensure that we process this ride again now that customers
@@ -188,6 +191,7 @@ public final class Ride {
         }
         this.info.put("distance", distance);
         this.info.put("duration", duration);
+        this.info.put("scenario", 0);
     }
 
     /**
@@ -230,6 +234,8 @@ public final class Ride {
         };
         requests[1].waypoints(wp2);
 
+        long minDuration = Long.MAX_VALUE;
+        int minIndex = 0;
         for (int i = 0; i < results.length; i++) {
             results[i] = (new DirectionsFinder(cfg)).fetchResult(requests[i]);
             if (null != results[i].routes && 0 != results[i].routes.length) {
@@ -238,6 +244,11 @@ public final class Ride {
                     totalDistances[i] += leg.distance.inMeters;
                     totalDurations[i] += leg.duration.inSeconds;
                 }
+            }
+            // temporary solution to get scenario
+            if (totalDurations[i] < minDuration) {
+                minDuration = totalDurations[i];
+                minIndex = i;
             }
         }
 
@@ -250,17 +261,16 @@ public final class Ride {
 
         this.info.put("distance", totalDistances[0]);
         this.info.put("duration", totalDurations[0]);
+        this.info.put("scenario", minIndex);
     }
 
     /**
      *
      *
      * @return distance in meters to complete this ride
+     * @deprecated
      */
     public long getDistance() {
-        if (!this.info.containsKey("distance")) {
-            this.process();
-        }
         return (long) this.info.get("distance");
     }
 
@@ -268,12 +278,28 @@ public final class Ride {
      *
      *
      * @return duration in seconds to complete this ride
+     * @deprecated
      */
     public long getDuration() {
-        if (!this.info.containsKey("duration")) {
+        return (long) this.get("duration");
+    }
+
+    /**
+     *
+     *
+     * @param key
+     * @return
+     */
+    public Object get(String key) {
+        if (!this.info.containsKey(key)) {
             this.process();
         }
-        return (long) this.info.get("duration");
+        if (!this.info.containsKey(key)) {
+            throw new NoSuchElementException(
+                "key `" + key + "` does not exist in ride"
+            );
+        }
+        return this.info.get(key);
     }
 
     /**
@@ -303,6 +329,7 @@ public final class Ride {
     private void reset() {
         this.info.remove("duration");
         this.info.remove("distance");
+        this.info.remove("scenario");
     }
 
     /**
