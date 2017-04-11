@@ -47,7 +47,7 @@ public class JupiterMain {
 
         MongoClient mongoClient = new MongoClient("localhost" , 27017);
         MongoDatabase db = mongoClient.getDatabase("jupiter");
-        MongoCollection<Document> collection = db.getCollection("result");
+        MongoCollection<Document> collection = db.getCollection("rides");
         db.drop();
 
         InputRule rule = new TimeWindowRule(
@@ -66,7 +66,7 @@ public class JupiterMain {
         ));
 
         //while (rule.hasCustomer()) {
-        for (int j = 0; j < 3 && rule.hasCustomer(); j++) {
+        for (int j = 0; j < 5 && rule.hasCustomer(); j++) {
             Customer customer = rule.nextCustomer();
             List<Customer> candidates = rule.getCandidates();
 
@@ -133,6 +133,21 @@ public class JupiterMain {
 
                 doc.put("duration_total", (long) ri.get("duration"));
                 doc.put("distance_total", (long) ri.get("distance"));
+
+                List<Long> durations = (List<Long>) ri.get("durations");
+                doc.put("t_p1_p2", durations.get(0));
+                doc.put("t_p2_d2", durations.get(1));
+                doc.put("t_d2_d1", durations.get(2));
+                doc.put("t_p2_d1", durations.get(3));
+                doc.put("t_d1_d2", durations.get(4));
+
+                List<Long> distances = (List<Long>) ri.get("distances");
+                doc.put("d_p1_p2", distances.get(0));
+                doc.put("d_p2_d2", distances.get(1));
+                doc.put("d_d2_d1", distances.get(2));
+                doc.put("d_p2_d1", distances.get(3));
+                doc.put("d_d1_d2", distances.get(4));
+
                 doc.put("scenario", (int) ri.get("scenario"));
 
                 List<Long> candidateIds = new ArrayList<Long>();

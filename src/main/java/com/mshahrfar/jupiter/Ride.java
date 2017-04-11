@@ -189,8 +189,25 @@ public final class Ride {
                 duration += leg.duration.inSeconds;
             }
         }
-        this.info.put("distance", distance);
+
+        List<Long> durations = new ArrayList<Long>();
+        durations.add((long) 0); // t_p1_p2
+        durations.add((long) 0); // t_p2_d2
+        durations.add((long) 0); // t_d2_d1
+        durations.add((long) 0); // t_p2_d1
+        durations.add((long) 0); // t_d1_d2
+        this.info.put("durations", durations);
+
+        List<Long> distances = new ArrayList<Long>();
+        distances.add((long) 0); // d_p1_p2
+        distances.add((long) 0); // d_p2_d2
+        distances.add((long) 0); // d_d2_d1
+        distances.add((long) 0); // d_p2_d1
+        distances.add((long) 0); // d_d1_d2
+        this.info.put("distances", distances);
+
         this.info.put("duration", duration);
+        this.info.put("distance", distance);
         this.info.put("scenario", 0);
     }
 
@@ -234,33 +251,50 @@ public final class Ride {
         };
         requests[1].waypoints(wp2);
 
+        int minIndex = 0; // dirty way to obtain scenario
         long minDuration = Long.MAX_VALUE;
-        int minIndex = 0;
+        long minDistance = Long.MAX_VALUE;
+        long[][] legsDurations = new long[2][3];
+        long[][] legsDistances = new long[2][3];
         for (int i = 0; i < results.length; i++) {
             results[i] = (new DirectionsFinder(cfg)).fetchResult(requests[i]);
             if (null != results[i].routes && 0 != results[i].routes.length) {
                 DirectionsRoute route = results[i].routes[0];
-                for (DirectionsLeg leg: route.legs) {
-                    totalDistances[i] += leg.distance.inMeters;
-                    totalDurations[i] += leg.duration.inSeconds;
+                for (int j = 0; j < route.legs.length; j++) {
+                    legsDurations[i][j] = route.legs[j].duration.inSeconds;
+                    legsDistances[i][j] = route.legs[j].distance.inMeters;
                 }
             }
             // temporary solution to get scenario
-            if (totalDurations[i] < minDuration) {
-                minDuration = totalDurations[i];
+            long totalDuration = Arrays.stream(legsDurations[i]).sum();
+            if (totalDuration < minDuration) {
+                minDuration = totalDuration;
                 minIndex = i;
             }
+            minDistance = Math.min(
+                minDistance,
+                Arrays.stream(legsDistances[i]).sum()
+            );
         }
 
-        // sort the arrays to find minimum total duration and distance
-        // sorting is not necessary and we could merge this step in the
-        // outer for loop above  but as long as array length is small
-        // we can afford sorting
-        Arrays.sort(totalDistances);
-        Arrays.sort(totalDurations);
+        List<Long> durations = new ArrayList<Long>();
+        durations.add(legsDurations[0][0]); // t_p1_p2
+        durations.add(legsDurations[0][1]); // t_p2_d2
+        durations.add(legsDurations[0][2]); // t_d2_d1
+        durations.add(legsDurations[1][1]); // t_p2_d1
+        durations.add(legsDurations[1][2]); // t_d1_d2
+        this.info.put("durations", durations);
 
-        this.info.put("distance", totalDistances[0]);
-        this.info.put("duration", totalDurations[0]);
+        List<Long> distances = new ArrayList<Long>();
+        distances.add(legsDistances[0][0]); // d_p1_p2
+        distances.add(legsDistances[0][1]); // d_p2_d2
+        distances.add(legsDistances[0][2]); // d_d2_d1
+        distances.add(legsDistances[1][1]); // d_p2_d1
+        distances.add(legsDistances[1][2]); // d_d1_d2
+        this.info.put("distances", distances);
+
+        this.info.put("duration", minDuration);
+        this.info.put("distance", minDistance);
         this.info.put("scenario", minIndex);
     }
 
