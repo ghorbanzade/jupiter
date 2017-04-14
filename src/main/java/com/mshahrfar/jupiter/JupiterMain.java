@@ -123,13 +123,18 @@ public class JupiterMain {
                 Document doc = new Document();
                 doc.put("customer_id", ri.getCustomers().get(0).getId());
 
-                List<Long> riderIds = new ArrayList<Long>();
-                Iterator<Customer> it = ri.getCustomers().iterator();
-                if (it.hasNext()) {
-                    it.next();
+                //List<Long> riderIds = new ArrayList<Long>();
+                //Iterator<Customer> it = ri.getCustomers().iterator();
+                //if (it.hasNext()) {
+                //    it.next();
+                //}
+                //it.forEachRemaining(c -> { riderIds.add(c.getId()); });
+                //doc.put("rider_ids", riderIds);
+                if (ri.getCustomers().size() < 2) {
+                  doc.put("rider_ids", null);
+                } else {
+                  doc.put("rider_ids", ri.getCustomers().get(0).getId());
                 }
-                it.forEachRemaining(c -> { riderIds.add(c.getId()); });
-                doc.put("rider_ids", riderIds);
 
                 doc.put("duration_total", (long) ri.get("duration"));
                 doc.put("distance_total", (long) ri.get("distance"));

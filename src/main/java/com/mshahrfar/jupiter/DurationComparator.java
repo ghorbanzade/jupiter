@@ -30,7 +30,10 @@ public class DurationComparator implements Comparator<Ride>, Serializable {
      */
     @Override
     public int compare(Ride ride1, Ride ride2) {
-        return Long.compare(ride1.getDuration(), ride2.getDuration());
+        return Long.compare(
+            (long) ride1.get("duration"),
+            (long) ride2.get("duration")
+        );
     }
 
 }

@@ -32,11 +32,10 @@ public class DurationSharePolicy implements SharePolicy {
      * @return
      */
     public boolean pass() {
+        long duration = (long) this.ride.get("duration");
+        double factor = cfg.getAsDouble("late.factor");
         for (Customer customer: this.ride.getCustomers()) {
-            if (
-              customer.getIndividualRideDuration() *
-              cfg.getAsDouble("late.factor") < this.ride.getDuration()
-            ) {
+            if (customer.getIndividualRideDuration() * factor < duration) {
                 return false;
             }
         }

@@ -30,7 +30,9 @@ public class DistanceComparator implements Comparator<Ride>, Serializable {
      */
     @Override
     public int compare(Ride ride1, Ride ride2) {
-        return Long.compare(ride1.getDistance(), ride2.getDistance());
+        long dist1 = (long) ride1.get("distance");
+        long dist2 = (long) ride2.get("distance");
+        return Long.compare(dist1, dist2);
     }
 
 }

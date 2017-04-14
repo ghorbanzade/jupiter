@@ -31,10 +31,10 @@ public final class FatalException extends RuntimeException {
   /**
    *
    *
-   * @param str
+   * @param msg
    */
-  public FatalException(String ex) {
-    super(ex);
+  public FatalException(String msg) {
+    super(msg);
   }
 
 }

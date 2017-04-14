@@ -38,9 +38,6 @@ public final class Ride {
 
     private static final Logger log = Logger.getLogger(CustomerParser.class);
     private static final Config cfg = ConfigManager.get("config/main.properties");
-    private static final GeoApiContext context = new GeoApiContext().setApiKey(
-        cfg.getAsString("google.maps.api.key")
-    );
     private final List<Customer> customers;
     private final Map<String, Object> info = new HashMap<String, Object>();
 
@@ -144,7 +141,7 @@ public final class Ride {
     /**
      *
      *
-     *
+     * @throws RideException
      */
     public void process() throws RideException {
         log.trace(String.format(
@@ -170,18 +167,22 @@ public final class Ride {
 
     /**
      *
+     *
+     * @throws RideException
      */
-    private void processDedicatedRide() {
+    private void processDedicatedRide() throws RideException {
         long distance = 0;
         long duration = 0;
-        DirectionsApiRequest request = DirectionsApi.newRequest(context);
-        request.mode(TravelMode.DRIVING);
-        request.departureTime(
+
+        DirectionRequest request = new DirectionRequest();
+        request.set("departureTime",
             this.findDepartureTime(this.customers.get(0).getPickupTime())
         );
-        request.origin(this.customers.get(0).getPickupLocation());
-        request.destination(this.customers.get(0).getDropoffLocation());
-        DirectionsResult result = (new DirectionsFinder(cfg)).fetchResult(request);
+        request.set("origin", this.customers.get(0).getPickupLocation());
+        request.set("destination", this.customers.get(0).getDropoffLocation());
+
+        DirectionsResult result = request.getResult();
+
         if (null != result.routes && 0 != result.routes.length) {
             DirectionsRoute route = result.routes[0];
             for (DirectionsLeg leg: route.legs) {
@@ -216,40 +217,42 @@ public final class Ride {
      */
     private void processSharedRide() {
 
-        DirectionsApiRequest[] requests = new DirectionsApiRequest[2];
+        DirectionRequest[] requests = new DirectionRequest[2];
         DirectionsResult[] results = new DirectionsResult[2];
         long[] totalDurations = new long[2];
         long[] totalDistances = new long[2];
 
         // Case 1: P1 -> P2 -> D2 -> D1
-        requests[0] = DirectionsApi.newRequest(context);
-        requests[0].mode(TravelMode.DRIVING);
 
-        requests[0].origin(this.customers.get(0).getPickupLocation());
-        requests[0].departureTime(
+        requests[0] = new DirectionRequest();
+        requests[0].set("origin", this.customers.get(0).getPickupLocation());
+        requests[0].set("destination",
+            this.customers.get(0).getDropoffLocation()
+        );
+        requests[0].set("departure_time",
             this.findDepartureTime(this.customers.get(0).getPickupTime())
         );
-        requests[0].destination(this.customers.get(0).getDropoffLocation());
         LatLng[] wp1 = {
             this.customers.get(1).getPickupLocation(),
             this.customers.get(1).getDropoffLocation()
         };
-        requests[0].waypoints(wp1);
+        requests[0].set("waypoints", wp1);
 
         // Case 2: P1 -> P2 -> D1 -> D2
-        requests[1] = DirectionsApi.newRequest(context);
-        requests[1].mode(TravelMode.DRIVING);
 
-        requests[1].origin(this.customers.get(0).getPickupLocation());
-        requests[1].departureTime(
+        requests[1] = new DirectionRequest();
+        requests[1].set("origin", this.customers.get(0).getPickupLocation());
+        requests[1].set("destination",
+            this.customers.get(1).getDropoffLocation()
+        );
+        requests[1].set("departureTime",
             this.findDepartureTime(this.customers.get(0).getPickupTime())
         );
-        requests[1].destination(this.customers.get(1).getDropoffLocation());
         LatLng[] wp2 = {
             this.customers.get(1).getPickupLocation(),
             this.customers.get(0).getDropoffLocation()
         };
-        requests[1].waypoints(wp2);
+        requests[1].set("waypoints", wp2);
 
         int minIndex = 0; // dirty way to obtain scenario
         long minDuration = Long.MAX_VALUE;
@@ -257,7 +260,7 @@ public final class Ride {
         long[][] legsDurations = new long[2][3];
         long[][] legsDistances = new long[2][3];
         for (int i = 0; i < results.length; i++) {
-            results[i] = (new DirectionsFinder(cfg)).fetchResult(requests[i]);
+            results[i] = requests[i].getResult();
             if (null != results[i].routes && 0 != results[i].routes.length) {
                 DirectionsRoute route = results[i].routes[0];
                 for (int j = 0; j < route.legs.length; j++) {
@@ -296,26 +299,6 @@ public final class Ride {
         this.info.put("duration", minDuration);
         this.info.put("distance", minDistance);
         this.info.put("scenario", minIndex);
-    }
-
-    /**
-     *
-     *
-     * @return distance in meters to complete this ride
-     * @deprecated
-     */
-    public long getDistance() {
-        return (long) this.info.get("distance");
-    }
-
-    /**
-     *
-     *
-     * @return duration in seconds to complete this ride
-     * @deprecated
-     */
-    public long getDuration() {
-        return (long) this.get("duration");
     }
 
     /**

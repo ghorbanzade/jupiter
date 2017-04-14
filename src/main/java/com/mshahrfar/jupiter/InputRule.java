@@ -39,7 +39,7 @@ public interface InputRule {
     /**
      *
      *
-     * @param
+     * @param filter
      */
     public void addFilter(Filter filter);
 
