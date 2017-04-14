@@ -145,7 +145,9 @@ public final class Ride {
      */
     public void process() throws RideException {
         log.trace(String.format(
-            "processing ride with %d customers", this.customers.size()
+            "processing ride with %d customers: %s",
+            this.customers.size(),
+            this.customers.toString()
         ));
         switch (this.customers.size()) {
             case 0:
@@ -163,6 +165,10 @@ public final class Ride {
                     "rides with more than 2 customers not supported yet"
                 );
         }
+        log.trace(String.format(
+            "total duration of this ride: %d",
+            (long) this.info.get("duration")
+        ));
     }
 
     /**
@@ -331,7 +337,7 @@ public final class Ride {
     /**
      *
      *
-     *
+     * @return
      */
     @Override
     public String toString() {

@@ -68,8 +68,9 @@ public final class Customer {
                 timeParser.parse(record.get("pickup_time")).getTime()
             );
 
-            int passengerCount = Integer.parseInt(record.get("passenger_count"));
-            info.put("passenger_count", passengerCount);
+            info.put("passenger_count",
+                Integer.parseInt(record.get("passenger_count"))
+            );
 
             info.put("record_number", record.getRecordNumber());
 
@@ -142,7 +143,7 @@ public final class Customer {
      */
     @Override
     public String toString() {
-        return info.toString();
+        return String.format("%d", this.getId());
     }
 
     /**

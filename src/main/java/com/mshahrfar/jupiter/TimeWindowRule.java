@@ -91,6 +91,7 @@ public class TimeWindowRule implements InputRule {
      * @return
      */
     public Customer nextCustomer() {
+        Customer ret = this.customer;
         long lastPickupTime = this.customer.getPickupTime();
         int index = this.candidates.indexOf(this.customer);
         this.candidates.remove(index);
@@ -98,7 +99,7 @@ public class TimeWindowRule implements InputRule {
         if (lastPickupTime != this.customer.getPickupTime()) {
             this.rebuild();
         }
-        return this.customer;
+        return ret;
     }
 
     /**

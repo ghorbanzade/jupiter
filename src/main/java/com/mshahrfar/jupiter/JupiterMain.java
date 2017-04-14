@@ -133,7 +133,7 @@ public class JupiterMain {
                 if (ri.getCustomers().size() < 2) {
                   doc.put("rider_ids", null);
                 } else {
-                  doc.put("rider_ids", ri.getCustomers().get(0).getId());
+                  doc.put("rider_ids", ri.getCustomers().get(1).getId());
                 }
 
                 doc.put("duration_total", (long) ri.get("duration"));
