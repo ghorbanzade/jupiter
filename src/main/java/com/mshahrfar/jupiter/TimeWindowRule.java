@@ -16,18 +16,17 @@ import java.util.List;
 /**
  *
  *
- * @author Mariam Shahrabifarahani
  * @author Pejman Ghorbanzade
  */
 public class TimeWindowRule implements InputRule {
 
-    private long limitLow;
-    private long limitHigh;
     private Customer temp;
     private Customer customer;
-    private CustomerParser parser;
-    private List<Customer> candidates = new ArrayList<Customer>();
-    private List<Filter> filters = new ArrayList<Filter>();
+    private final long limitLow;
+    private final long limitHigh;
+    private final CustomerParser parser;
+    private final List<Customer> candidates = new ArrayList<Customer>();
+    private final List<Filter> filters = new ArrayList<Filter>();
 
     private static final Logger log = Logger.getLogger(JupiterMain.class);
 
@@ -35,18 +34,18 @@ public class TimeWindowRule implements InputRule {
      *
      *
      * @param parser
-     * @param limitLow
-     * @param limitHigh
+     * @param boundLow
+     * @param boundHigh
      */
     public TimeWindowRule(
         CustomerParser parser,
-        long limitLow,
-        long limitHigh
+        long boundLow,
+        long boundHigh
     ) {
         this.parser = parser;
-        this.limitLow = limitLow * 1000;
-        this.limitHigh = limitHigh * 1000;
         this.customer = this.parser.next();
+        this.limitLow = boundLow * 1000;
+        this.limitHigh = boundHigh * 1000;
         this.candidates.add(customer);
         this.rebuild();
     }
@@ -56,32 +55,38 @@ public class TimeWindowRule implements InputRule {
      */
     private void rebuild() {
         if (null != this.temp) {
-            if (this.temp.getPickupTime() < this.customer.getPickupTime() + this.limitHigh) {
+            if (this.temp.getPickupTime() - this.customer.getPickupTime() < this.limitHigh) {
                 this.candidates.add(this.temp);
+                this.temp = null;
             } else {
                 return;
             }
         }
         while (this.parser.hasNext()) {
             Customer candidate = this.parser.next();
-            if (candidate.getPickupTime() < this.customer.getPickupTime() + this.limitHigh) {
+            if (candidate.getPickupTime() - this.customer.getPickupTime() < this.limitHigh) {
                 this.candidates.add(candidate);
             } else {
                 this.temp = candidate;
                 break;
             }
         }
-        while (this.candidates.get(0).getPickupTime() < this.customer.getPickupTime() - this.limitLow) {
+        while (this.candidates.get(0).getPickupTime() + this.limitLow < this.customer.getPickupTime()) {
             this.candidates.remove(0);
         }
     }
 
     /**
-     *
+     * Note that we cannot use parser.hasNext() here because parser may not
+     * have additional records to read but local temp variable may contain
+     * a customer.
      *
      * @return
      */
     public boolean hasCustomer() {
+        if (null != this.temp) {
+          return true;
+        }
         return (this.customer != this.candidates.get(this.candidates.size() - 1));
     }
 

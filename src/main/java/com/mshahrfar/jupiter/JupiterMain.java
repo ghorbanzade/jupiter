@@ -46,11 +46,8 @@ public class JupiterMain {
         Config cfg = ConfigManager.get("config/main.properties");
 
         MongoClient mongoClient = new MongoClient("localhost" , 27017);
-        MongoDatabase db = mongoClient.getDatabase("jupiter");
-        MongoCollection<Document> collection = db.getCollection("rides");
-        db.drop();
 
-        InputRule rule = new TimeWindowRule(
+        InputRule input = new TimeWindowRule(
             new DatasetParser(Paths.get(
                 cfg.getAsString("dataset.sample.filepath")
             )),
@@ -58,15 +55,31 @@ public class JupiterMain {
             cfg.getAsInt("time.window.bound.high")
         );
 
-        rule.addFilter(new VicinityFilter(
+        input.addFilter(new VicinityFilter(
             cfg.getAsInt("vicinity")
         ));
-        rule.addFilter(new RideCapacityFilter(
+        input.addFilter(new RideCapacityFilter(
             cfg.getAsInt("ride.capacity")
         ));
 
-        //while (rule.hasCustomer()) {
-        for (int j = 0; j < 5 && rule.hasCustomer(); j++) {
+        storeRides(mongoClient, input);
+    }
+
+    /**
+     *
+     * @param mongoClient
+     * @param rule
+     */
+    private static void storeRides(
+        MongoClient mongoClient, InputRule rule
+    ) {
+
+        MongoDatabase db = mongoClient.getDatabase("jupiter");
+        MongoCollection<Document> collection = db.getCollection("rides");
+        db.drop();
+
+        while (rule.hasCustomer()) {
+        //for (int j = 0; j < 5 && rule.hasCustomer(); j++) {
             Customer customer = rule.nextCustomer();
             List<Customer> candidates = rule.getCandidates();
 
@@ -162,12 +175,40 @@ public class JupiterMain {
                 doc.put("candidates_count", candidateIds.size());
                 doc.put("candidate_ids", candidateIds);
                 collection.insertOne(doc);
-
             } catch (RideException ex) {
                 log.trace(ex.getMessage());
             }
         }
+    }
 
+
+    /**
+     *
+     *
+     * @param mongoClient
+     * @param input
+     */
+    private static void storeCandidateIds(
+        MongoClient mongoClient, InputRule input
+    ) {
+        MongoDatabase db = mongoClient.getDatabase("jupiter");
+        MongoCollection<Document> collection = db.getCollection("rides");
+        db.drop();
+        while (input.hasCustomer()) {
+            Customer customer = input.nextCustomer();
+            List<Customer> candidates = input.getCandidates();
+
+            Document doc = new Document();
+            doc.put("customer_id", customer.getId());
+
+            List<Long> candidateIds = new ArrayList<Long>();
+            candidates.iterator().forEachRemaining(
+                c -> { candidateIds.add(c.getId()); }
+            );
+            doc.put("candidates_count", candidateIds.size());
+            doc.put("candidate_ids", candidateIds);
+            collection.insertOne(doc);
+        }
     }
 
     /**

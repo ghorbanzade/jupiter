@@ -56,8 +56,10 @@ public final class Customer {
             double dropoffLat = Double.parseDouble(record.get("dropoff_latitude"));
             double dropoffLng = Double.parseDouble(record.get("dropoff_longitude"));
             info.put("dropoff_location", new LatLng(dropoffLat, dropoffLng));
-
-            DateFormat dateParser = new SimpleDateFormat("dd/MM/yyyyHH:mm:ss");
+            // June 01 datasets use this format for pickup date
+            DateFormat dateParser = new SimpleDateFormat("MM/dd/yyyyHH:mm:ss");
+            // June 04 datasets use this format for pickup date
+            //DateFormat dateParser = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss");
             String pickupTimeStr = record.get("pickup_datetime1")
                                  + record.get("pickup_datetime2");
             info.put("pickup_time", dateParser.parse(pickupTimeStr).getTime());
@@ -73,6 +75,10 @@ public final class Customer {
             );
 
             info.put("record_number", record.getRecordNumber());
+
+            info.put("customer_id",
+                Integer.parseInt(record.get("customer_id"))
+            );
 
         } catch (NumberFormatException | ParseException ex) {
             throw new CustomerException(
@@ -114,7 +120,7 @@ public final class Customer {
      * @return a record number assigned to customer entry in the database
      */
     public long getId() {
-        return (long) info.get("record_number");
+        return (int) info.get("customer_id");
     }
 
     /**
