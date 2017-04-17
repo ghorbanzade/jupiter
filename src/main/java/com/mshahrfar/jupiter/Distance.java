@@ -19,7 +19,7 @@ public class Distance {
     private LatLng src;
     private LatLng dst;
 
-    private static final int EARTH_RADIUS = 6371; // radius of the earth
+    private static final int EARTH_RADIUS = 6371000; // radius of the earth
 
     /**
      *
@@ -39,12 +39,12 @@ public class Distance {
      */
     public double getShortestPath() {
         double latDistance = Math.toRadians(dst.lat - src.lat);
-        double lonDistance = Math.toRadians(dst.lng - src.lng);
+        double lngDistance = Math.toRadians(dst.lng - src.lng);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
                 + Math.cos(Math.toRadians(src.lat)) * Math.cos(Math.toRadians(dst.lat))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return EARTH_RADIUS * c * 1000; // convert to meters
+        return EARTH_RADIUS * c ; // convert to meters
     }
 
 }
