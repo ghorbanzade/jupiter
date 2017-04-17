@@ -64,13 +64,13 @@ public class DirectionRequest {
    */
   public DirectionsResult getResult() {
     if (this.isInDb()) {
-      log.info("request found in database");
+      log.trace("request found in database");
       return this.getResultFromDb();
     }
     DirectionsResult result = this.getResultFromApi();
-    log.info("received result from google directions api");
+    log.trace("received result from google directions api");
     this.addToDb(result);
-    log.info("added google directions api result to the database");
+    log.trace("added google directions api result to the database");
     return result;
   }
 
@@ -81,7 +81,7 @@ public class DirectionRequest {
    * @throws RideException
    */
   private DirectionsResult getResultFromApi() throws RideException {
-    log.info("sending request to google directions api");
+    log.trace("sending request to google directions api");
     if (cfg.getAsInt("google.maps.api.cap.day") == apiQueryCounter) {
       throw new RideException("daily query cap reached");
     }
@@ -123,7 +123,7 @@ public class DirectionRequest {
    * @param result
    */
   public void addToDb(DirectionsResult result) {
-    log.info("adding google directions api result to the database");
+    log.trace("adding google directions api result to the database");
   }
 
 }

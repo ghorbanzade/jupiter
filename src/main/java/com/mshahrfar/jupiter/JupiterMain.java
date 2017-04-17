@@ -68,105 +68,84 @@ public class JupiterMain {
     /**
      *
      * @param mongoClient
-     * @param rule
+     * @param input
      */
     private static void storeRides(
-        MongoClient mongoClient, InputRule rule
+        MongoClient mongoClient, InputRule input
     ) {
-
         MongoDatabase db = mongoClient.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
         db.drop();
 
-        while (rule.hasCustomer()) {
-        //for (int j = 0; j < 5 && rule.hasCustomer(); j++) {
-            Customer customer = rule.nextCustomer();
-            List<Customer> candidates = rule.getCandidates();
+        //for (int j = 0; j < 1 && input.hasCustomer(); j++) {
+        while (input.hasCustomer()) {
+
+            Customer customer = input.nextCustomer();
+
+            // get the list of customers with whom this customer
+            // may share his ride.
+            List<Customer> candidates = input.getCandidates();
 
             log.info(String.format(
                 "customer %d: %d candidates found",
                 customer.getId(), candidates.size()
             ));
+
             try {
-                Ride ride = new Ride(customer);
-                List<Ride> rides = new ArrayList<Ride>();
-                for (Customer candidate: candidates) {
-                    try {
-                        rides.add(ride.with(candidate));
-                    } catch (RideException ex) {
-                        log.warn(ex.getMessage());
-                        continue;
-                    }
-                }
-                Ride ri = null;
-                if (!rides.isEmpty()) {
-                    log.info(String.format(
-                        "customer %d: finding best shared ride among %d rides",
-                        customer.getId(), rides.size()
+
+                // create a list of possible shared rides with this customer
+                // and a subset of candidates
+                List<Ride> rides = findCandidateRides(customer, candidates);
+
+                // find the best ride among a list of possible rides
+                Ride ride = findBestRide(customer, rides);
+
+                log.info(String.format(
+                  "customer %d: ride " + ride.getCustomers(),
+                  customer.getId()
+                ));
+
+                // exclude candidates
+                for (Customer rider: ride.getCustomers()) {
+                  if (!rider.equals(customer)) {
+                    input.excludeCandidate(rider);
+                    log.trace(String.format(
+                      "customer %d excluded from future consideration",
+                      rider.getId()
                     ));
-                    Collections.sort(rides, new DurationComparator());
-                    log.info(String.format(
-                        "customer %d: found best shared ride candidate",
-                        customer.getId()
-                    ));
-                    if ((new DurationSharePolicy(rides.get(0))).pass()) {
-                        ri = rides.get(0);
-                        log.info(String.format(
-                            "customer %d: ride will be shared",
-                            customer.getId()
-                        ));
-                        for (Customer rider: rides.get(0).getCustomers()) {
-                            if (!rider.equals(customer)) {
-                                rule.excludeCandidate(rider);
-                                log.warn(String.format(
-                                    "customer %d excluded from future considerations",
-                                    rider.getId()
-                                ));
-                            }
-                        }
-                    }
-                } else {
-                    ri = new Ride(customer);
-                    log.warn(String.format(
-                        "customer %d: no shared ride candidate exists",
-                        customer.getId()
-                    ));
+                  }
                 }
 
+                // store in database
                 Document doc = new Document();
-                doc.put("customer_id", ri.getCustomers().get(0).getId());
+                doc.put("customer_id", ride.getCustomers().get(0).getId());
 
-                //List<Long> riderIds = new ArrayList<Long>();
-                //Iterator<Customer> it = ri.getCustomers().iterator();
-                //if (it.hasNext()) {
-                //    it.next();
-                //}
-                //it.forEachRemaining(c -> { riderIds.add(c.getId()); });
-                //doc.put("rider_ids", riderIds);
-                if (ri.getCustomers().size() < 2) {
-                  doc.put("rider_ids", null);
-                } else {
-                  doc.put("rider_ids", ri.getCustomers().get(1).getId());
+                List<Long> riderIds = new ArrayList<Long>();
+                Iterator<Customer> it = ride.getCustomers().iterator();
+                if (it.hasNext()) {
+                    it.next();
                 }
+                it.forEachRemaining(c -> { riderIds.add(c.getId()); });
+                doc.put("rider_ids", riderIds);
 
-                doc.put("duration_total", (long) ri.get("duration"));
-                doc.put("distance_total", (long) ri.get("distance"));
+                doc.put("duration_total", (long) ride.get("duration"));
+                doc.put("distance_total", (long) ride.get("distance"));
 
-                List<Long> durations = (List<Long>) ri.get("durations");
+                List<Long> durations = (List<Long>) ride.get("durations");
                 doc.put("t_p1_p2", durations.get(0));
                 doc.put("t_p2_d2", durations.get(1));
                 doc.put("t_d2_d1", durations.get(2));
                 doc.put("t_p2_d1", durations.get(3));
                 doc.put("t_d1_d2", durations.get(4));
 
-                List<Long> distances = (List<Long>) ri.get("distances");
+                List<Long> distances = (List<Long>) ride.get("distances");
                 doc.put("d_p1_p2", distances.get(0));
                 doc.put("d_p2_d2", distances.get(1));
                 doc.put("d_d2_d1", distances.get(2));
                 doc.put("d_p2_d1", distances.get(3));
                 doc.put("d_d1_d2", distances.get(4));
 
-                doc.put("scenario", (int) ri.get("scenario"));
+                doc.put("scenario", (int) ride.get("scenario"));
 
                 List<Long> candidateIds = new ArrayList<Long>();
                 candidates.iterator().forEachRemaining(
@@ -181,6 +160,50 @@ public class JupiterMain {
         }
     }
 
+    /**
+     *
+     *
+     * @param customer
+     * @param candidates
+     * @return
+     */
+    public static List<Ride> findCandidateRides(
+      Customer customer, List<Customer> candidates
+    ) {
+      Ride ride = new Ride(customer);
+      List<Ride> rides = new ArrayList<Ride>();
+      for (Customer candidate: candidates) {
+        try {
+          rides.add(ride.with(candidate));
+        } catch (RideException ex) {
+          log.warn(ex.getMessage());
+          continue;
+        }
+      }
+      return rides;
+    }
+
+    /**
+     *
+     *
+     * @param customer
+     * @param rides
+     * @return
+     */
+    private static Ride findBestRide(Customer customer, List<Ride> rides) {
+      if (!rides.isEmpty()) {
+        // sort possible shared rides based on total duration
+        Collections.sort(rides, new DurationComparator());
+        for (Ride ride: rides) {
+          if ((new DurationSharePolicy(ride).pass())) {
+            return ride;
+          }
+        }
+      }
+      // if there is no possible shared ride or all of them fail
+      // the duration policy test, return a single-customer ride
+      return new Ride(customer);
+    }
 
     /**
      *
