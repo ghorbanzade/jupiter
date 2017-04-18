@@ -46,7 +46,7 @@ public final class Customer {
      * @param record
      * @throws CustomerException
      */
-    public void initialize(CSVRecord record) throws CustomerException {
+    private void initialize(CSVRecord record) throws CustomerException {
         try {
 
             double pickupLat = Double.parseDouble(record.get("pickup_latitude"));

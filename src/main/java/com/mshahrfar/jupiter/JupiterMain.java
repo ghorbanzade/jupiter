@@ -77,7 +77,6 @@ public class JupiterMain {
         MongoCollection<Document> collection = db.getCollection("rides");
         db.drop();
 
-        //for (int j = 0; j < 1 && input.hasCustomer(); j++) {
         while (input.hasCustomer()) {
 
             Customer customer = input.nextCustomer();
@@ -167,7 +166,7 @@ public class JupiterMain {
      * @param candidates
      * @return
      */
-    public static List<Ride> findCandidateRides(
+    private static List<Ride> findCandidateRides(
       Customer customer, List<Customer> candidates
     ) {
       Ride ride = new Ride(customer);
@@ -230,6 +229,29 @@ public class JupiterMain {
             );
             doc.put("candidates_count", candidateIds.size());
             doc.put("candidate_ids", candidateIds);
+            collection.insertOne(doc);
+        }
+    }
+
+    /**
+     *
+     *
+     * @param mongoClient
+     * @param input
+     */
+    private static void storeSingleCustomerRides(
+      MongoClient mongoClient, InputRule input
+    ) {
+        MongoDatabase db = mongoClient.getDatabase("jupiter");
+        MongoCollection<Document> collection = db.getCollection("rides");
+        db.drop();
+        while (input.hasCustomer()) {
+            Customer customer = input.nextCustomer();
+            Ride ride = new Ride(customer);
+            Document doc = new Document();
+            doc.put("customer_id", customer.getId());
+            doc.put("google_distance", ride.get("distance"));
+            doc.put("google_duration", ride.get("duration"));
             collection.insertOne(doc);
         }
     }
