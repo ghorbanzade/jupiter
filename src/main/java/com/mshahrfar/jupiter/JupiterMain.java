@@ -73,6 +73,7 @@ public class JupiterMain {
     private static void storeRides(
         MongoClient mongoClient, InputRule input
     ) {
+
         MongoDatabase db = mongoClient.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
         db.drop();
@@ -85,10 +86,8 @@ public class JupiterMain {
             // may share his ride.
             List<Customer> candidates = input.getCandidates();
 
-            log.info(String.format(
-                "customer %d: %d candidates found",
-                customer.getId(), candidates.size()
-            ));
+            log.info("customer: " + customer);
+            log.info("candidates: " + candidates);
 
             try {
 

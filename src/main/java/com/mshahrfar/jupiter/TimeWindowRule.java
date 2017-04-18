@@ -21,6 +21,7 @@ import java.util.List;
 public class TimeWindowRule implements InputRule {
 
     private Customer temp;
+    private Customer prev;
     private Customer customer;
     private final long limitLow;
     private final long limitHigh;
@@ -96,7 +97,7 @@ public class TimeWindowRule implements InputRule {
      * @return
      */
     public Customer nextCustomer() {
-        Customer ret = this.customer;
+        this.prev = this.customer;
         long lastPickupTime = this.customer.getPickupTime();
         int index = this.candidates.indexOf(this.customer);
         this.candidates.remove(index);
@@ -104,7 +105,7 @@ public class TimeWindowRule implements InputRule {
         if (lastPickupTime != this.customer.getPickupTime()) {
             this.rebuild();
         }
-        return ret;
+        return prev;
     }
 
     /**
@@ -115,12 +116,12 @@ public class TimeWindowRule implements InputRule {
     public List<Customer> getCandidates() {
         List<Customer> list = new ArrayList<Customer>();
         for (Customer candidate: this.candidates) {
-            if (this.customer == candidate) {
+            if (this.prev == candidate) {
                 continue;
             }
             boolean shouldAdd = true;
-            for (Filter filter: filters) {
-                if (!filter.pass(customer, candidate)) {
+            for (Filter filter: this.filters) {
+                if (!filter.pass(this.prev, candidate)) {
                     shouldAdd = false;
                     break;
                 }
