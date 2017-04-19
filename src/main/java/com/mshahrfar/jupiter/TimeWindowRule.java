@@ -88,22 +88,36 @@ public class TimeWindowRule implements InputRule {
         if (null != this.temp) {
           return true;
         }
-        return (this.customer != this.candidates.get(this.candidates.size() - 1));
+        if (null != this.customer) {
+          return true;
+        }
+        return false;
     }
 
     /**
      *
      *
      * @return
+     * @throws CustomerException
      */
-    public Customer nextCustomer() {
-        this.prev = this.customer;
-        long lastPickupTime = this.customer.getPickupTime();
-        int index = this.candidates.indexOf(this.customer);
-        this.candidates.remove(index);
-        this.customer = this.candidates.get(index);
-        if (lastPickupTime != this.customer.getPickupTime()) {
-            this.rebuild();
+    public Customer nextCustomer() throws CustomerException {
+        try {
+          this.prev = (Customer) this.customer.clone();
+        } catch (CloneNotSupportedException ex) {
+          throw new CustomerException("failed to clone customer");
+        }
+        this.customer = null;
+        if (!this.candidates.isEmpty()) {
+          if (this.candidates.contains(this.customer)) {
+            int index = this.candidates.indexOf(this.customer);
+            this.candidates.remove(index);
+            this.customer = this.candidates.get(index);
+          } else {
+            this.customer = this.candidates.remove(0);
+          }
+          if (this.prev.getPickupTime() != this.customer.getPickupTime()) {
+              this.rebuild();
+          }
         }
         return prev;
     }

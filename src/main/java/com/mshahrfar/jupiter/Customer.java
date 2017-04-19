@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author Pejman Ghorbanzade
  */
-public final class Customer {
+public final class Customer implements Cloneable {
 
     private static final Logger log = Logger.getLogger(CustomerParser.class);
 
@@ -122,6 +122,17 @@ public final class Customer {
             return (this.getId() == candidate.getId());
         }
         return false;
+    }
+
+    /**
+     *
+     *
+     * @return
+     * @throws CloneNotSupportedException
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException{
+      return super.clone();
     }
 
 }
