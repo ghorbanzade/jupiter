@@ -38,13 +38,13 @@ public class Distance {
      * @return
      */
     public double getShortestPath() {
-        double latDistance = Math.toRadians(dst.lat - src.lat);
-        double lngDistance = Math.toRadians(dst.lng - src.lng);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+        double dLat = Math.toRadians(dst.lat - src.lat);
+        double dLng = Math.toRadians(dst.lng - src.lng);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
                 + Math.cos(Math.toRadians(src.lat)) * Math.cos(Math.toRadians(dst.lat))
-                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return EARTH_RADIUS * c ; // convert to meters
+                * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double ret = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * EARTH_RADIUS;
+        return ret;
     }
 
 }

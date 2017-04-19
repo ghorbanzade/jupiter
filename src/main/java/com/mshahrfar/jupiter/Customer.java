@@ -12,9 +12,6 @@ import org.apache.log4j.Logger;
 
 import com.google.maps.model.LatLng;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,59 +29,19 @@ public final class Customer {
 
     /**
      *
-     *
-     * @param record
-     * @throws CustomerException
      */
-    public Customer(CSVRecord record) throws CustomerException {
-        this.initialize(record);
+    public Customer() {
+      // intentionally left empty
     }
 
     /**
      *
      *
-     * @param record
-     * @throws CustomerException
+     * @param key
+     * @param value
      */
-    private void initialize(CSVRecord record) throws CustomerException {
-        try {
-
-            double pickupLat = Double.parseDouble(record.get("pickup_latitude"));
-            double pickupLng = Double.parseDouble(record.get("pickup_longitude"));
-            info.put("pickup_location", new LatLng(pickupLat, pickupLng));
-
-            double dropoffLat = Double.parseDouble(record.get("dropoff_latitude"));
-            double dropoffLng = Double.parseDouble(record.get("dropoff_longitude"));
-            info.put("dropoff_location", new LatLng(dropoffLat, dropoffLng));
-            // June 01 datasets use this format for pickup date
-            DateFormat dateParser = new SimpleDateFormat("MM/dd/yyyyHH:mm:ss");
-            // June 04 datasets use this format for pickup date
-            //DateFormat dateParser = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss");
-            String pickupTimeStr = record.get("pickup_datetime1")
-                                 + record.get("pickup_datetime2");
-            info.put("pickup_time", dateParser.parse(pickupTimeStr).getTime());
-
-            DateFormat timeParser = new SimpleDateFormat("H:mm:ss");
-            info.put("individual_ride_duration",
-                timeParser.parse(record.get("dropoff_time")).getTime() -
-                timeParser.parse(record.get("pickup_time")).getTime()
-            );
-
-            info.put("passenger_count",
-                Integer.parseInt(record.get("passenger_count"))
-            );
-
-            info.put("record_number", record.getRecordNumber());
-
-            info.put("customer_id",
-                Integer.parseInt(record.get("customer_id"))
-            );
-
-        } catch (NumberFormatException | ParseException ex) {
-            throw new CustomerException(
-                "invalid passenger record: " + record.getRecordNumber()
-            );
-        }
+    public void set(String key, Object value) {
+      this.info.put(key, value);
     }
 
     /**
