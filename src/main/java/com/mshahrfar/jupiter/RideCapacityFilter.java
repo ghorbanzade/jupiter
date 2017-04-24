@@ -16,8 +16,22 @@ import java.util.List;
  */
 public class RideCapacityFilter implements Filter {
 
+  private static final Config cfg = ConfigManager.get("config/main.properties");
+
     int capacity;
 
+  /**
+   *
+   */
+  public RideCapacityFilter() {
+    this.capacity = cfg.getAsInt("ride.capacity");
+  }
+
+  /**
+   *
+   *
+   * @param capacity
+   */
     public RideCapacityFilter(int capacity) {
         this.capacity = capacity;
     }

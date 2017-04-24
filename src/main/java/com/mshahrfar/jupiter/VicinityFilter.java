@@ -14,8 +14,22 @@ package com.mshahrfar.jupiter;
  */
 public class VicinityFilter implements Filter {
 
+  private static final Config cfg = ConfigManager.get("config/main.properties");
+
     int vicinity;
 
+  /**
+   *
+   */
+  public VicinityFilter() {
+    this.vicinity = cfg.getAsInt("vicinity");
+  }
+
+  /**
+   *
+   *
+   * @param vicinity
+   */
     public VicinityFilter(int vicinity) {
         this.vicinity = vicinity;
     }

@@ -16,6 +16,9 @@ import org.apache.log4j.Logger;
 
 import org.bson.Document;
 
+import java.lang.reflect.Constructor;
+import java.lang.ReflectiveOperationException;
+
 import java.nio.file.Paths;
 import java.nio.file.Path;
 
@@ -55,14 +58,28 @@ public class JupiterMain {
             cfg.getAsInt("time.window.bound.high")
         );
 
-        input.addFilter(new VicinityFilter(
-            cfg.getAsInt("vicinity")
-        ));
-        input.addFilter(new RideCapacityFilter(
-            cfg.getAsInt("ride.capacity")
-        ));
+        String filters = cfg.getAsString("filters");
+        List<String> items = Arrays.asList(filters.split("\\s*,\\s*"));
+        for (String item: items) {
+          String filter = String.format(
+            "com.mshahrfar.jupiter.%sFilter", item
+          );
+          try {
+            Class<?> cls = Class.forName(filter);
+            Constructor<?> constructor = cls.getConstructor();
+            Filter instance = (Filter) constructor.newInstance();
+            input.addFilter(instance);
+            log.info("applied filter " + filter);
+          } catch (ClassNotFoundException ex) {
+            log.error("class does not exist for filter: " + filter);
+          } catch (ReflectiveOperationException ex) {
+            log.error("failed to instantiate filter: " + filter);
+          }
+        }
 
-        storeRides(mongoClient, input);
+        //storeRides(mongoClient, input);
+        //storeCandidateIds(mongoClient, input);
+        //storeSingleCustomerRides(mongoClient, input);
     }
 
     /**
@@ -212,6 +229,7 @@ public class JupiterMain {
     private static void storeCandidateIds(
         MongoClient mongoClient, InputRule input
     ) {
+
         MongoDatabase db = mongoClient.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
         db.drop();
@@ -241,6 +259,7 @@ public class JupiterMain {
     private static void storeSingleCustomerRides(
       MongoClient mongoClient, InputRule input
     ) {
+
         MongoDatabase db = mongoClient.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
         db.drop();
