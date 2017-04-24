@@ -141,6 +141,10 @@ public final class DatasetParser implements CustomerParser {
                 Integer.parseInt(record.get("customer_id"))
             );
 
+            customer.set("cluster_id",
+                Integer.parseInt(record.get("cluster"))
+            );
+
         } catch (NumberFormatException | ParseException ex) {
             throw new CustomerException(
                 "invalid passenger record: " + record.getRecordNumber()

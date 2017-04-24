@@ -81,6 +81,19 @@ public final class Customer implements Cloneable {
     }
 
     /**
+     * Returns the cluster in which this customer is located. if dataset
+     * is preprocessed by the algorithm, it may have a column that
+     * associates this customer with a cluster. However dataset may not
+     * have been processed in which case null is returned.
+     *
+     * @return ID of the cluster in which this customer is located or
+     *         null if dataset is not preprocessed
+     */
+    public int getClusterId() {
+        return (int) info.get("cluster_id");
+    }
+
+    /**
      *
      *
      * @return number of seconds it takes for this customer to get
