@@ -7,8 +7,6 @@
 
 package com.mshahrfar.jupiter;
 
-import java.util.List;
-
 /**
  *
  *

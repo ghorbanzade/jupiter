@@ -7,8 +7,6 @@
 
 package com.mshahrfar.jupiter;
 
-import org.apache.log4j.Logger;
-
 /**
  *
  *
@@ -17,8 +15,6 @@ import org.apache.log4j.Logger;
  * @see Customer
  */
 public final class CustomerException extends RuntimeException {
-
-    private static final Logger log = Logger.getLogger(CustomerException.class);
 
     /**
      *

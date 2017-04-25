@@ -7,12 +7,10 @@
 
 package com.mshahrfar.jupiter;
 
-import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
 
 import com.google.maps.model.LatLng;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +27,8 @@ public final class Customer implements Cloneable {
 
     /**
      *
+     *
+     * @param id
      */
     public Customer(int id) {
       this.set("customer_id", id);
@@ -47,7 +47,8 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return a LatLng object representing pickup location in latitude and longitude
+     * @return a LatLng object representing pickup location
+     *         in latitude and longitude
      */
     public LatLng getPickupLocation() {
         return (LatLng) info.get("pickup_location");
@@ -56,7 +57,8 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return a LatLng object representing dropoff location in latitude and longitude
+     * @return a LatLng object representing dropoff location
+     *         in latitude and longitude
      */
     public LatLng getDropoffLocation() {
         return (LatLng) info.get("dropoff_location");

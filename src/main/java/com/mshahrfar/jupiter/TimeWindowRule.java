@@ -9,7 +9,6 @@ package com.mshahrfar.jupiter;
 
 import org.apache.log4j.Logger;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,10 +87,7 @@ public class TimeWindowRule implements InputRule {
         if (null != this.temp) {
           return true;
         }
-        if (null != this.customer) {
-          return true;
-        }
-        return false;
+        return (null != this.customer);
     }
 
     /**

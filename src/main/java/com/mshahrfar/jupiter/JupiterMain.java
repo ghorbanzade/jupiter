@@ -10,7 +10,6 @@ package com.mshahrfar.jupiter;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 
 import org.apache.log4j.Logger;
 

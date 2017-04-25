@@ -9,15 +9,11 @@ package com.mshahrfar.jupiter;
 
 import org.apache.log4j.Logger;
 
-import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
-import com.google.maps.GeoApiContext;
-import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsLeg;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
-import com.google.maps.model.TravelMode;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
