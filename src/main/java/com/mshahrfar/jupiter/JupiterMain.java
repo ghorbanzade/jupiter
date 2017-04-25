@@ -77,7 +77,7 @@ public class JupiterMain {
           }
         }
 
-        //storeRides(mongoClient, input);
+        storeRides(mongoClient, input);
         //storeCandidateIds(mongoClient, input);
         //storeSingleCustomerRides(mongoClient, input);
     }
