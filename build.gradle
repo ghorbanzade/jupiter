@@ -44,6 +44,12 @@ jar {
     }
 }
 
+test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}
+
 task myJavadocs(type: Javadoc) {
     source = sourceSets.main.allJava
     classpath = configurations.compile

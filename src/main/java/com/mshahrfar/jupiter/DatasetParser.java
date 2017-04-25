@@ -132,7 +132,7 @@ public final class DatasetParser implements CustomerParser {
                 dateParser.parse(dropoffTimeStr).getTime() / 1000
             );
 
-            customer.set("passenger_count",Integer.parseInt(record.get("passenger_count")));
+            customer.set("passenger_count", Integer.parseInt(record.get("passenger_count")));
             return customer;
         } catch (NumberFormatException | ParseException ex) {
             throw new CustomerException(
