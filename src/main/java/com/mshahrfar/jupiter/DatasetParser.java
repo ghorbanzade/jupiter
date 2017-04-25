@@ -103,50 +103,43 @@ public final class DatasetParser implements CustomerParser {
      * @throws CustomerException
      */
     private Customer createCustomer(CSVRecord record) throws CustomerException {
-        Customer customer = new Customer();
         try {
+            Customer customer = new Customer(
+                Integer.parseInt(record.get("customer_id"))
+            );
+            customer.set("record_number", record.getRecordNumber());
+
             double pickupLat = Double.parseDouble(record.get("pickup_latitude"));
             double pickupLng = Double.parseDouble(record.get("pickup_longitude"));
             customer.set("pickup_location",
-              new LatLng(pickupLat, pickupLng)
+                new LatLng(pickupLat, pickupLng)
             );
 
             double dropoffLat = Double.parseDouble(record.get("dropoff_latitude"));
             double dropoffLng = Double.parseDouble(record.get("dropoff_longitude"));
             customer.set("dropoff_location",
-              new LatLng(dropoffLat, dropoffLng)
+                new LatLng(dropoffLat, dropoffLng)
             );
 
-            // June 01 datasets use this format for pickup date
             DateFormat dateParser = new SimpleDateFormat("MM/dd/yyyyHH:mm:ss");
-            // June 04 datasets use this format for pickup date
-            //DateFormat dateParser = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss");
-            String pickupTimeStr = record.get("pickup_datetime1")
-                                 + record.get("pickup_datetime2");
-            customer.set("pickup_time", dateParser.parse(pickupTimeStr).getTime());
 
-            DateFormat timeParser = new SimpleDateFormat("H:mm:ss");
-            customer.set("individual_ride_duration",
-                timeParser.parse(record.get("dropoff_time")).getTime() -
-                timeParser.parse(record.get("pickup_time")).getTime()
+            String pickupTimeStr = record.get("pickup_date") + record.get("pickup_time");
+            customer.set("pickup_time",
+                dateParser.parse(pickupTimeStr).getTime() / 1000
             );
 
-            customer.set("passenger_count",
-                Integer.parseInt(record.get("passenger_count"))
+            String dropoffTimeStr = record.get("dropoff_date") + record.get("dropoff_time");
+            customer.set("dropoff_time",
+                dateParser.parse(dropoffTimeStr).getTime() / 1000
             );
 
-            customer.set("record_number", record.getRecordNumber());
-
-            customer.set("customer_id",
-                Integer.parseInt(record.get("customer_id"))
-            );
-
+            customer.set("passenger_count",Integer.parseInt(record.get("passenger_count")));
+            return customer;
         } catch (NumberFormatException | ParseException ex) {
             throw new CustomerException(
                 "invalid passenger record: " + record.getRecordNumber()
             );
         }
-        return customer;
     }
 
 }

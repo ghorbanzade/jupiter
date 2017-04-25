@@ -30,8 +30,8 @@ public final class Customer implements Cloneable {
     /**
      *
      */
-    public Customer() {
-      // intentionally left empty
+    public Customer(int id) {
+      this.set("customer_id", id);
     }
 
     /**
@@ -65,7 +65,7 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return a Date object representing pickup time
+     * @return the unix time in seconds when customer is picked-up
      */
     public long getPickupTime() {
         return (long) info.get("pickup_time");
@@ -87,7 +87,7 @@ public final class Customer implements Cloneable {
      *         to his destination using NYC cabs
      */
     public long getIndividualRideDuration() {
-        return (long) info.get("individual_ride_duration");
+        return (long) info.get("dropoff_time") - (long) info.get("pickup_time");
     }
 
     /**

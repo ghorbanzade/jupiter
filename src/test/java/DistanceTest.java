@@ -37,8 +37,8 @@ public class DistanceTest {
    */
   @Test
   public void checkVicinityFilter() {
-    Customer customerA = new Customer();
-    Customer customerB = new Customer();
+    Customer customerA = new Customer(1);
+    Customer customerB = new Customer(2);
     customerA.set("pickup_location", new LatLng(40.83954620, -73.94101715));
     customerB.set("pickup_location", new LatLng(40.77891159, -73.95391846));
     Filter filter = new VicinityFilter(7000);
