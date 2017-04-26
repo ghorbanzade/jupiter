@@ -1,6 +1,8 @@
 language: java
 jdk:
   - oraclejdk8
+before_install:
+  - export TZ=America/Chicago
 notifications:
   email:
     recipients:
