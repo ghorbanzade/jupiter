@@ -115,7 +115,8 @@ public final class Customer implements Cloneable {
      *
      *
      * @param obj
-     * @return
+     * @return true if this customer has the same id as the given customer
+     *         object and false otherwise
      */
     @Override
     public boolean equals(Object obj) {
@@ -129,8 +130,8 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return
-     * @throws CloneNotSupportedException
+     * @return an object identical to this customer
+     * @throws CloneNotSupportedException if we fail to clone this customer
      */
     @Override
     public Object clone() throws CloneNotSupportedException{

@@ -49,7 +49,7 @@ public class JupiterMain {
 
         MongoClient mongoClient = new MongoClient("localhost" , 27017);
 
-        InputRule input = new TimeWindowRule(
+        CustomerInput input = new TimeWindowInput(
             new DatasetParser(Paths.get(
                 cfg.getAsString("dataset.sample.filepath")
             )),
@@ -87,7 +87,7 @@ public class JupiterMain {
      * @param input
      */
     private static void storeRides(
-        MongoClient mongoClient, InputRule input
+        MongoClient mongoClient, CustomerInput input
     ) {
 
         MongoDatabase db = mongoClient.getDatabase("jupiter");
@@ -226,7 +226,7 @@ public class JupiterMain {
      * @param input
      */
     private static void storeCandidateIds(
-        MongoClient mongoClient, InputRule input
+        MongoClient mongoClient, CustomerInput input
     ) {
 
         MongoDatabase db = mongoClient.getDatabase("jupiter");
@@ -256,7 +256,7 @@ public class JupiterMain {
      * @param input
      */
     private static void storeSingleCustomerRides(
-      MongoClient mongoClient, InputRule input
+      MongoClient mongoClient, CustomerInput input
     ) {
 
         MongoDatabase db = mongoClient.getDatabase("jupiter");

@@ -39,7 +39,9 @@ public class RideCapacityFilter implements Filter {
      *
      * @param customer
      * @param candidate
-     * @return
+     * @return true if the number of passengers with the given customer
+     *         together with number of passengers with the given candidate
+     *         do not exceed the maximum number of passengers in each ride
      */
     public boolean pass(Customer customer, Customer candidate) {
         int count1 = customer.countPassengers();
