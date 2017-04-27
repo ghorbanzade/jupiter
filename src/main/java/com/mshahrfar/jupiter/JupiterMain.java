@@ -8,6 +8,7 @@
 package com.mshahrfar.jupiter;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
 
@@ -51,7 +52,10 @@ public class JupiterMain {
             ResourceManager.close();
         }));
 
-        MongoClient mongoClient = new MongoClient("localhost" , 27017);
+        //MongoClient mongoClient = new MongoClient("localhost", 27017);
+        MongoClient mongoClient = new MongoClient(new MongoClientURI(
+            cfg.getAsString("mongo.client.uri")
+        ));
         ResourceManager.put("mongo_client", mongoClient);
 
         CustomerInput input = new TimeWindowInput(
@@ -97,7 +101,7 @@ public class JupiterMain {
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
-        //collection.drop();
+        collection.drop();
 
         while (input.hasCustomer()) {
 
