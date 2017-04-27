@@ -48,6 +48,7 @@ public class JupiterMain {
         Config cfg = ConfigManager.get("config/main.properties");
 
         MongoClient mongoClient = new MongoClient("localhost" , 27017);
+        ResourceManager.add("mongo_client", mongoClient);
 
         CustomerInput input = new TimeWindowInput(
             new DatasetParser(Paths.get(
@@ -76,23 +77,23 @@ public class JupiterMain {
           }
         }
 
-        storeRides(mongoClient, input);
-        //storeCandidateIds(mongoClient, input);
-        //storeSingleCustomerRides(mongoClient, input);
+        storeRides(input);
+        //storeCandidateIds(input);
+        //storeSingleCustomerRides(input);
     }
 
     /**
      *
-     * @param mongoClient
+     *
      * @param input
      */
     private static void storeRides(
-        MongoClient mongoClient, CustomerInput input
+        CustomerInput input
     ) {
-
-        MongoDatabase db = mongoClient.getDatabase("jupiter");
+        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+        MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
-        db.drop();
+        //db.drop();
 
         while (input.hasCustomer()) {
 
@@ -222,14 +223,14 @@ public class JupiterMain {
     /**
      *
      *
-     * @param mongoClient
      * @param input
      */
     private static void storeCandidateIds(
-        MongoClient mongoClient, CustomerInput input
+        CustomerInput input
     ) {
 
-        MongoDatabase db = mongoClient.getDatabase("jupiter");
+        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+        MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
         db.drop();
         while (input.hasCustomer()) {
@@ -252,14 +253,13 @@ public class JupiterMain {
     /**
      *
      *
-     * @param mongoClient
      * @param input
      */
     private static void storeSingleCustomerRides(
-      MongoClient mongoClient, CustomerInput input
+        CustomerInput input
     ) {
-
-        MongoDatabase db = mongoClient.getDatabase("jupiter");
+        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+        MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
         db.drop();
         while (input.hasCustomer()) {

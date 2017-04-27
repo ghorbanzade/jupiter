@@ -24,6 +24,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
+import java.util.TimeZone;
 
 /**
  *
@@ -34,6 +35,7 @@ import java.util.Iterator;
 public final class DatasetParser implements CustomerParser {
 
     private static final Logger log = Logger.getLogger(DatasetParser.class);
+    private static final Config cfg = ConfigManager.get("config/main.properties");
     private CSVParser parser;
     private Iterator<CSVRecord> recordIterator;
 
@@ -121,15 +123,16 @@ public final class DatasetParser implements CustomerParser {
             );
 
             DateFormat dateParser = new SimpleDateFormat("MM/dd/yyyyHH:mm:ss");
+            dateParser.setTimeZone(TimeZone.getTimeZone(cfg.getAsString("timezone")));
 
             String pickupTimeStr = record.get("pickup_date") + record.get("pickup_time");
             customer.set("pickup_time",
-                dateParser.parse(pickupTimeStr).getTime() / 1000
+                dateParser.parse(pickupTimeStr).getTime()
             );
 
             String dropoffTimeStr = record.get("dropoff_date") + record.get("dropoff_time");
             customer.set("dropoff_time",
-                dateParser.parse(dropoffTimeStr).getTime() / 1000
+                dateParser.parse(dropoffTimeStr).getTime()
             );
 
             customer.set("passenger_count", Integer.parseInt(record.get("passenger_count")));

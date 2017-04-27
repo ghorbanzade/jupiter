@@ -67,7 +67,7 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return the unix time in seconds when customer is picked-up
+     * @return the unix time in milliseconds when customer is picked-up
      */
     public long getPickupTime() {
         return (long) info.get("pickup_time");
@@ -85,7 +85,7 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return number of seconds it takes for this customer to get
+     * @return number of milliseconds it takes for this customer to get
      *         to his destination using NYC cabs
      */
     public long getIndividualRideDuration() {

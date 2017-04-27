@@ -44,8 +44,8 @@ public class CustomerTest {
         Customer customer = parser.next();
         assertThat(customer.getId(), is(1L));
         assertThat(customer.countPassengers(), is(1));
-        assertThat(customer.getPickupTime(), is(1401627600L));
-        assertThat(customer.getIndividualRideDuration(), is(1200L));
+        assertThat(customer.getPickupTime(), is(1401624000000L));
+        assertThat(customer.getIndividualRideDuration(), is(1200000L));
         assertThat(customer.getPickupLocation().lat, is(40.6453743));
         assertThat(customer.getDropoffLocation().lng, is(-73.9438858));
         parser.close();
