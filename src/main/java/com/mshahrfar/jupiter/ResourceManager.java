@@ -7,7 +7,10 @@
 
 package com.mshahrfar.jupiter;
 
+import org.apache.log4j.Logger;
+
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,18 +22,42 @@ import java.util.Map;
  */
 public final class ResourceManager {
 
+    private static final Logger log = Logger.getLogger(DatasetParser.class);
     private static final Map<String, Closeable> resources =
         new HashMap<String, Closeable>();
 
-    public static void add(String key, Closeable value) {
-        if (!resources.containsKey(key)) {
-            resources.put(key, value);
-        }
+    /**
+     *
+     *
+     * @param key
+     * @param value
+     */
+    public static void put(String key, Closeable value) {
+        resources.putIfAbsent(key, value);
     }
 
+    /**
+     *
+     *
+     * @param key
+     */
     public static Object get(String key) {
         return resources.get(key);
     }
 
-}
+    /**
+     *
+     *
+     */
+    public static void close() {
+        resources.forEach((k, v) -> {
+            try {
+                log.info("closing resource " + k);
+                v.close();
+            } catch (IOException ex) {
+                log.warn("failed to close resource " + k);
+            }
+        });
+    }
 
+}

@@ -47,8 +47,12 @@ public class JupiterMain {
         log.info("Hello from Jupiter");
         Config cfg = ConfigManager.get("config/main.properties");
 
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            ResourceManager.close();
+        }));
+
         MongoClient mongoClient = new MongoClient("localhost" , 27017);
-        ResourceManager.add("mongo_client", mongoClient);
+        ResourceManager.put("mongo_client", mongoClient);
 
         CustomerInput input = new TimeWindowInput(
             new DatasetParser(Paths.get(
