@@ -93,7 +93,7 @@ public class JupiterMain {
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
-        //db.drop();
+        //collection.drop();
 
         while (input.hasCustomer()) {
 
@@ -231,8 +231,8 @@ public class JupiterMain {
 
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
-        MongoCollection<Document> collection = db.getCollection("rides");
-        db.drop();
+        MongoCollection<Document> collection = db.getCollection("candidates");
+        collection.drop();
         while (input.hasCustomer()) {
             Customer customer = input.nextCustomer();
             List<Customer> candidates = input.getCandidates();
@@ -260,8 +260,8 @@ public class JupiterMain {
     ) {
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
-        MongoCollection<Document> collection = db.getCollection("rides");
-        db.drop();
+        MongoCollection<Document> collection = db.getCollection("single_rides");
+        collection.drop();
         while (input.hasCustomer()) {
             Customer customer = input.nextCustomer();
             Ride ride = new Ride(customer);
