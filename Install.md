@@ -17,3 +17,9 @@ To run the software, run the following command from Jupiter root directory.
 ```
 java -jar build/libs/jupiter-v0.x.jar
 ```
+
+You can also run the application using gradle:
+
+```
+./gradlew run
+```
