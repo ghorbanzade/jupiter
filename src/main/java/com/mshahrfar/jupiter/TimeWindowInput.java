@@ -9,7 +9,6 @@ package com.mshahrfar.jupiter;
 
 import org.apache.log4j.Logger;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +17,7 @@ import java.util.List;
  *
  * @author Pejman Ghorbanzade
  */
-public class TimeWindowRule implements InputRule {
+public class TimeWindowInput implements CustomerInput {
 
     private Customer temp;
     private Customer prev;
@@ -38,7 +37,7 @@ public class TimeWindowRule implements InputRule {
      * @param boundLow
      * @param boundHigh
      */
-    public TimeWindowRule(
+    public TimeWindowInput(
         CustomerParser parser,
         long boundLow,
         long boundHigh
@@ -82,22 +81,19 @@ public class TimeWindowRule implements InputRule {
      * have additional records to read but local temp variable may contain
      * a customer.
      *
-     * @return
+     * @return true if there is still a customer in parser
      */
     public boolean hasCustomer() {
         if (null != this.temp) {
           return true;
         }
-        if (null != this.customer) {
-          return true;
-        }
-        return false;
+        return (null != this.customer);
     }
 
     /**
      *
      *
-     * @return
+     * @return a customer to be handled
      * @throws CustomerException
      */
     public Customer nextCustomer() throws CustomerException {
@@ -125,7 +121,8 @@ public class TimeWindowRule implements InputRule {
     /**
      *
      *
-     * @return
+     * @return list of customers who may be able to share the ride with
+     *         current customer
      */
     public List<Customer> getCandidates() {
         List<Customer> list = new ArrayList<Customer>();
@@ -148,19 +145,20 @@ public class TimeWindowRule implements InputRule {
     }
 
     /**
+     * Registers a filter to be applied to list of candidates given for any
+     * customer.
      *
-     *
-     * @param filter
+     * @param filter the filter to be registered and applied to the list
+     *        of candidates
      */
     public void addFilter(Filter filter) {
         this.filters.add(filter);
     }
 
     /**
+     * Excludes a given customer from future consideration.
      *
-     *
-     *
-     * @param candidate
+     * @param candidate the customer to be excluded for future consideration
      */
     public void excludeCandidate(Customer candidate) {
         if (!this.candidates.remove(candidate)) {

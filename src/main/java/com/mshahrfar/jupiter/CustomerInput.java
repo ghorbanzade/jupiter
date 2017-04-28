@@ -13,12 +13,13 @@ import java.util.List;
  *
  * @author Mariam Shahrabifarahanai
  */
-public interface InputRule {
+public interface CustomerInput {
 
     /**
      *
      *
-     * @return
+     * @return true if input has a customer that has not been handled yet and
+     *         false otherwise
      */
     public boolean hasCustomer();
 

@@ -7,7 +7,14 @@
 
 package com.mshahrfar.jupiter;
 
-import org.apache.log4j.Logger;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+
+import com.google.gson.Gson;
 
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
@@ -16,6 +23,10 @@ import com.google.maps.model.LatLng;
 import com.google.maps.model.TravelMode;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.errors.ApiException;
+
+import org.apache.log4j.Logger;
+
+import org.bson.Document;
 
 import org.joda.time.DateTime;
 
@@ -63,11 +74,12 @@ public class DirectionRequest {
    * @return
    */
   public DirectionsResult getResult() {
-    if (this.isInDb()) {
-      log.trace("request found in database");
-      return this.getResultFromDb();
+    DirectionsResult result = this.getResultFromDb();
+    if (null != result) {
+        log.trace("request found in database");
+        return result;
     }
-    DirectionsResult result = this.getResultFromApi();
+    result = this.getResultFromApi();
     log.trace("received result from google directions api");
     this.addToDb(result);
     log.trace("added google directions api result to the database");
@@ -86,7 +98,9 @@ public class DirectionRequest {
       throw new RideException("daily query cap reached");
     }
     try {
-      this.request.departureTime(new DateTime(this.info.get("departure_time")));
+        this.request.departureTime(new DateTime(
+            this.info.get("departure_time")
+        ));
       this.request.origin((LatLng) this.info.get("origin"));
       this.request.destination((LatLng) this.info.get("destination"));
       this.request.waypoints((LatLng[]) this.info.get("waypoints"));
@@ -105,16 +119,26 @@ public class DirectionRequest {
    * @return
    */
   private DirectionsResult getResultFromDb() {
-    return new DirectionsResult();
-  }
-
-  /**
-   *
-   *
-   * @return
-   */
-  private boolean isInDb() {
-    return false;
+        DirectionsResult result = null;
+        Gson gson = new Gson();
+        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+        MongoDatabase db = client.getDatabase("jupiter");
+        MongoCollection<Document> collection = db.getCollection("api");
+        BasicDBObject query = new BasicDBObject(
+            "request", gson.toJson(this.info)
+        );
+        MongoCursor<Document> cursor = collection.find(query).iterator();
+        try {
+            if (cursor.hasNext()) {
+                result = (DirectionsResult) gson.fromJson(
+                    (String) cursor.next().get("google_result"),
+                    DirectionsResult.class
+                );
+            }
+        } finally {
+            cursor.close();
+        }
+        return result;
   }
 
   /**
@@ -123,7 +147,19 @@ public class DirectionRequest {
    * @param result
    */
   public void addToDb(DirectionsResult result) {
-    log.trace("adding google directions api result to the database");
+        log.trace("adding google directions api result to the database");
+        Gson gson = new Gson();
+        String requestStr = gson.toJson(this.info);
+        String resultStr = gson.toJson(result);
+
+        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+        MongoDatabase db = client.getDatabase("jupiter");
+        MongoCollection<Document> collection = db.getCollection("api");
+        Document doc = new Document();
+        doc.put("request", requestStr);
+        doc.put("google_result", resultStr);
+        collection.insertOne(doc);
+        log.trace("added google directions api result to the database");
   }
 
 }

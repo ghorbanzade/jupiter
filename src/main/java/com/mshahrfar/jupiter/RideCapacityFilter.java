@@ -7,8 +7,6 @@
 
 package com.mshahrfar.jupiter;
 
-import java.util.List;
-
 /**
  *
  *
@@ -16,22 +14,22 @@ import java.util.List;
  */
 public class RideCapacityFilter implements Filter {
 
-  private static final Config cfg = ConfigManager.get("config/main.properties");
+    private static final Config cfg = ConfigManager.get("config/main.properties");
 
-    int capacity;
+    private int capacity;
 
-  /**
-   *
-   */
-  public RideCapacityFilter() {
-    this.capacity = cfg.getAsInt("ride.capacity");
-  }
+    /**
+     *
+     */
+    public RideCapacityFilter() {
+      this.capacity = cfg.getAsInt("ride.capacity");
+    }
 
-  /**
-   *
-   *
-   * @param capacity
-   */
+    /**
+     *
+     *
+     * @param capacity
+     */
     public RideCapacityFilter(int capacity) {
         this.capacity = capacity;
     }
@@ -41,7 +39,9 @@ public class RideCapacityFilter implements Filter {
      *
      * @param customer
      * @param candidate
-     * @return
+     * @return true if the number of passengers with the given customer
+     *         together with number of passengers with the given candidate
+     *         do not exceed the maximum number of passengers in each ride
      */
     public boolean pass(Customer customer, Customer candidate) {
         int count1 = customer.countPassengers();

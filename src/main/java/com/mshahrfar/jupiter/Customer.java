@@ -7,12 +7,10 @@
 
 package com.mshahrfar.jupiter;
 
-import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
 
 import com.google.maps.model.LatLng;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +27,11 @@ public final class Customer implements Cloneable {
 
     /**
      *
+     *
+     * @param id
      */
-    public Customer() {
-      // intentionally left empty
+    public Customer(long id) {
+      this.set("customer_id", id);
     }
 
     /**
@@ -47,7 +47,8 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return a LatLng object representing pickup location in latitude and longitude
+     * @return a LatLng object representing pickup location
+     *         in latitude and longitude
      */
     public LatLng getPickupLocation() {
         return (LatLng) info.get("pickup_location");
@@ -56,7 +57,8 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return a LatLng object representing dropoff location in latitude and longitude
+     * @return a LatLng object representing dropoff location
+     *         in latitude and longitude
      */
     public LatLng getDropoffLocation() {
         return (LatLng) info.get("dropoff_location");
@@ -65,7 +67,7 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return a Date object representing pickup time
+     * @return the unix time in milliseconds when customer is picked-up
      */
     public long getPickupTime() {
         return (long) info.get("pickup_time");
@@ -77,30 +79,33 @@ public final class Customer implements Cloneable {
      * @return a record number assigned to customer entry in the database
      */
     public long getId() {
-        return (int) info.get("customer_id");
+        return (long) info.get("customer_id");
     }
 
     /**
      * Returns the cluster in which this customer is located. if dataset
      * is preprocessed by the algorithm, it may have a column that
      * associates this customer with a cluster. However dataset may not
-     * have been processed in which case null is returned.
+     * have been processed in which case -1 is returned.
      *
      * @return ID of the cluster in which this customer is located or
      *         null if dataset is not preprocessed
      */
     public int getClusterId() {
+        if (null == info.get("cluster_id")) {
+            return -1;
+        }
         return (int) info.get("cluster_id");
     }
 
     /**
      *
      *
-     * @return number of seconds it takes for this customer to get
+     * @return number of milliseconds it takes for this customer to get
      *         to his destination using NYC cabs
      */
     public long getIndividualRideDuration() {
-        return (long) info.get("individual_ride_duration");
+        return (long) info.get("dropoff_time") - (long) info.get("pickup_time");
     }
 
     /**
@@ -126,7 +131,8 @@ public final class Customer implements Cloneable {
      *
      *
      * @param obj
-     * @return
+     * @return true if this customer has the same id as the given customer
+     *         object and false otherwise
      */
     @Override
     public boolean equals(Object obj) {
@@ -140,8 +146,8 @@ public final class Customer implements Cloneable {
     /**
      *
      *
-     * @return
-     * @throws CloneNotSupportedException
+     * @return an object identical to this customer
+     * @throws CloneNotSupportedException if we fail to clone this customer
      */
     @Override
     public Object clone() throws CloneNotSupportedException{

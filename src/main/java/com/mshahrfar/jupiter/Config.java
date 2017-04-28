@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-
 /**
  * This class allows defining configuration parameters in a separate properties
  * file instead of resorting to hard-coding them.

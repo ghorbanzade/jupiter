@@ -7,8 +7,6 @@
 
 package com.mshahrfar.jupiter;
 
-import java.util.List;
-
 /**
  *
  *
@@ -19,7 +17,8 @@ public interface SharePolicy {
     /**
      *
      *
-     * @return
+     * @return true if the ride complies with policy implementing this
+     *         interface
      */
     public boolean pass();
 

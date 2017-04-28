@@ -8,9 +8,9 @@
 package com.mshahrfar.jupiter;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 
 import org.apache.log4j.Logger;
 
@@ -48,9 +48,17 @@ public class JupiterMain {
         log.info("Hello from Jupiter");
         Config cfg = ConfigManager.get("config/main.properties");
 
-        MongoClient mongoClient = new MongoClient("localhost" , 27017);
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            ResourceManager.close();
+        }));
 
-        InputRule input = new TimeWindowRule(
+        //MongoClient mongoClient = new MongoClient("localhost", 27017);
+        MongoClient mongoClient = new MongoClient(new MongoClientURI(
+            cfg.getAsString("mongo.client.uri")
+        ));
+        ResourceManager.put("mongo_client", mongoClient);
+
+        CustomerInput input = new TimeWindowInput(
             new DatasetParser(Paths.get(
                 cfg.getAsString("dataset.sample.filepath")
             )),
@@ -77,23 +85,23 @@ public class JupiterMain {
           }
         }
 
-        //storeRides(mongoClient, input);
-        //storeCandidateIds(mongoClient, input);
-        //storeSingleCustomerRides(mongoClient, input);
+        storeRides(input);
+        //storeCandidateIds(input);
+        //storeSingleCustomerRides(input);
     }
 
     /**
      *
-     * @param mongoClient
+     *
      * @param input
      */
     private static void storeRides(
-        MongoClient mongoClient, InputRule input
+        CustomerInput input
     ) {
-
-        MongoDatabase db = mongoClient.getDatabase("jupiter");
+        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+        MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
-        db.drop();
+        collection.drop();
 
         while (input.hasCustomer()) {
 
@@ -223,16 +231,16 @@ public class JupiterMain {
     /**
      *
      *
-     * @param mongoClient
      * @param input
      */
     private static void storeCandidateIds(
-        MongoClient mongoClient, InputRule input
+        CustomerInput input
     ) {
 
-        MongoDatabase db = mongoClient.getDatabase("jupiter");
-        MongoCollection<Document> collection = db.getCollection("rides");
-        db.drop();
+        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+        MongoDatabase db = client.getDatabase("jupiter");
+        MongoCollection<Document> collection = db.getCollection("candidates");
+        collection.drop();
         while (input.hasCustomer()) {
             Customer customer = input.nextCustomer();
             List<Customer> candidates = input.getCandidates();
@@ -253,16 +261,15 @@ public class JupiterMain {
     /**
      *
      *
-     * @param mongoClient
      * @param input
      */
     private static void storeSingleCustomerRides(
-      MongoClient mongoClient, InputRule input
+        CustomerInput input
     ) {
-
-        MongoDatabase db = mongoClient.getDatabase("jupiter");
-        MongoCollection<Document> collection = db.getCollection("rides");
-        db.drop();
+        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+        MongoDatabase db = client.getDatabase("jupiter");
+        MongoCollection<Document> collection = db.getCollection("single_rides");
+        collection.drop();
         while (input.hasCustomer()) {
             Customer customer = input.nextCustomer();
             Ride ride = new Ride(customer);

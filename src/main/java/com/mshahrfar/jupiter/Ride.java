@@ -9,15 +9,11 @@ package com.mshahrfar.jupiter;
 
 import org.apache.log4j.Logger;
 
-import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
-import com.google.maps.GeoApiContext;
-import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsLeg;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
-import com.google.maps.model.TravelMode;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -181,7 +177,7 @@ public final class Ride {
         long duration = 0;
 
         DirectionRequest request = new DirectionRequest();
-        request.set("departureTime",
+        request.set("departure_time",
             this.findDepartureTime(this.customers.get(0).getPickupTime())
         );
         request.set("origin", this.customers.get(0).getPickupLocation());
@@ -251,7 +247,7 @@ public final class Ride {
         requests[1].set("destination",
             this.customers.get(1).getDropoffLocation()
         );
-        requests[1].set("departureTime",
+        requests[1].set("departure_time",
             this.findDepartureTime(this.customers.get(0).getPickupTime())
         );
         LatLng[] wp2 = {
@@ -356,20 +352,24 @@ public final class Ride {
     }
 
     /**
+     * If given datetime is in the future, it will be set as the departure
+     * time. If given datetime is in the past, we will set the departure time
+     * to the the earliest datetime in the future that has the same day and
+     * same time as the given datetime.
      *
-     *
-     * @param the number of seconds since January 1, 1970, 00:00:00 GMT
-     *              represented by this date
-     * @return a DateTime object in the future that has the same time as
-     *               the given unix time
+     * @param tin unix time in milliseconds representing customer pickup time
+     * @return unix time in milliseconds representing customer departure time
      */
-    private DateTime findDepartureTime(long epoch) {
-        DateTime ret = new DateTime(epoch);
-        ret = ret.withDate(LocalDate.now());
+    private long findDepartureTime(long tin) {
+        DateTime ret = new DateTime(tin);
         if (ret.isBeforeNow()) {
-            ret = ret.plusDays(1);
+            int day = ret.getDayOfWeek();
+            ret = ret.withDate(LocalDate.now());
+            while (ret.getDayOfWeek() != day) {
+                ret = ret.plusDays(1);
+            }
         }
-        return ret;
+        return ret.getMillis();
     }
 
 }
