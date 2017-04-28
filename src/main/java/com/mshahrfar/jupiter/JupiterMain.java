@@ -8,6 +8,7 @@
 package com.mshahrfar.jupiter;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
@@ -52,9 +53,11 @@ public class JupiterMain {
             ResourceManager.close();
         }));
 
-        //MongoClient mongoClient = new MongoClient("localhost", 27017);
         MongoClient mongoClient = new MongoClient(new MongoClientURI(
-            cfg.getAsString("mongo.client.uri")
+            cfg.getAsString("mongo.client.uri"),
+            MongoClientOptions.builder().serverSelectionTimeout(
+                cfg.getAsInt("mongo.client.timeout")
+            )
         ));
         ResourceManager.put("mongo_client", mongoClient);
 
@@ -95,9 +98,7 @@ public class JupiterMain {
      *
      * @param input
      */
-    private static void storeRides(
-        CustomerInput input
-    ) {
+    private static void storeRides(CustomerInput input) {
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("rides");
@@ -233,9 +234,7 @@ public class JupiterMain {
      *
      * @param input
      */
-    private static void storeCandidateIds(
-        CustomerInput input
-    ) {
+    private static void storeCandidateIds(CustomerInput input) {
 
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
@@ -263,9 +262,7 @@ public class JupiterMain {
      *
      * @param input
      */
-    private static void storeSingleCustomerRides(
-        CustomerInput input
-    ) {
+    private static void storeSingleCustomerRides(CustomerInput input) {
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("single_rides");
