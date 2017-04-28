@@ -30,7 +30,7 @@ public final class Customer implements Cloneable {
      *
      * @param id
      */
-    public Customer(int id) {
+    public Customer(long id) {
       this.set("customer_id", id);
     }
 
@@ -79,7 +79,7 @@ public final class Customer implements Cloneable {
      * @return a record number assigned to customer entry in the database
      */
     public long getId() {
-        return (int) info.get("customer_id");
+        return (long) info.get("customer_id");
     }
 
     /**
