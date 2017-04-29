@@ -15,6 +15,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
@@ -44,9 +45,14 @@ public class DirectionRequest {
   private static int apiQueryCounter = 0;
   private static final Logger log = Logger.getLogger(DatasetParser.class);
   private static final Config cfg = ConfigManager.get("config/main.properties");
-  private static final GeoApiContext context = new GeoApiContext().setApiKey(
-      cfg.getAsString("google.maps.api.key")
-  );
+
+    private static final GeoApiContext context = new GeoApiContext()
+        .setApiKey(cfg.getAsString("google.maps.api.key"));
+
+    private static final Gson gsonRequest = new Gson();
+    private static final Gson gsonResult = (new GsonBuilder())
+        .setExclusionStrategies(new DirectionsResultExclusionStrategy())
+        .create();
 
   private final DirectionsApiRequest request = DirectionsApi.newRequest(context);
   private final Map<String, Object> info = new HashMap<String, Object>();
@@ -120,18 +126,17 @@ public class DirectionRequest {
    */
   private DirectionsResult getResultFromDb() {
         DirectionsResult result = null;
-        Gson gson = new Gson();
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("api");
         BasicDBObject query = new BasicDBObject(
-            "request", gson.toJson(this.info)
+            "request", gsonRequest.toJson(this.info)
         );
         MongoCursor<Document> cursor = collection.find(query).iterator();
         try {
             if (cursor.hasNext()) {
-                result = (DirectionsResult) gson.fromJson(
-                    (String) cursor.next().get("google_result"),
+                result = (DirectionsResult) gsonResult.fromJson(
+                    (String) cursor.next().get("result"),
                     DirectionsResult.class
                 );
             }
@@ -148,16 +153,16 @@ public class DirectionRequest {
    */
   public void addToDb(DirectionsResult result) {
         log.trace("adding google directions api result to the database");
-        Gson gson = new Gson();
-        String requestStr = gson.toJson(this.info);
-        String resultStr = gson.toJson(result);
+
+        String requestStr = gsonRequest.toJson(this.info);
+        String resultStr = gsonResult.toJson(result);
 
         MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
         MongoDatabase db = client.getDatabase("jupiter");
         MongoCollection<Document> collection = db.getCollection("api");
         Document doc = new Document();
         doc.put("request", requestStr);
-        doc.put("google_result", resultStr);
+        doc.put("result", resultStr);
         collection.insertOne(doc);
         log.trace("added google directions api result to the database");
   }
