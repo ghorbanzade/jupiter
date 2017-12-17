@@ -4,9 +4,14 @@ services:
   - docker
 before_install:
   - docker build -t ghorbanzade/jupiter .
-  - docker ps -a
 script:
-  - docker run ghorbanzade/jupiter /bin/bash -c "./gradlew clean build"
+  - docker run -it -v `pwd`/build:/jupiter/build ghorbanzade/jupiter /bin/bash -c "./gradlew build"
+after_success:
+  - ./tools/coverage.sh codacy codecov
+  - if [ "$TRAVIS_BRANCH" == "feature/docker" ]; then
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+    docker push ghorbanzade/jupiter;
+    fi
 notifications:
   email:
     recipients:
