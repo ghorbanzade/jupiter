@@ -6,7 +6,7 @@ addons:
     sources:
     - jq
 after_success:
-  - ./dev/coverage.sh codacy codecov
+  - ./tools/coverage.sh codacy codecov
 notifications:
   email:
     recipients:
