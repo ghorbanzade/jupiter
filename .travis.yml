@@ -1,13 +1,13 @@
 sudo: required
-language: java
 services:
   - docker
 before_install:
   - docker build -t ghorbanzade/jupiter .
+install: true
 script:
-  - docker run -it -v `pwd`/build:/jupiter/build ghorbanzade/jupiter /bin/bash -c "./gradlew build"
+  - docker run -it -v `pwd`/build:/jupiter/build:rw ghorbanzade/jupiter /bin/bash -c "./gradlew build"
 after_success:
-  - ./tools/coverage.sh codacy codecov
+  - ./tools/coverage.sh codecov
   - if [ "$TRAVIS_BRANCH" == "feature/docker" ]; then
     docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
     docker push ghorbanzade/jupiter;
