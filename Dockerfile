@@ -1,5 +1,5 @@
 FROM openjdk:8-slim
-MAINTAINER Pejman Ghorbanzade <pejman@ghorbanzade.com>
+label maintainer="pejman@ghorbanzade.com"
 
 COPY . /jupiter
 WORKDIR /jupiter

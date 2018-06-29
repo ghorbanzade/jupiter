@@ -5,13 +5,15 @@
 // https://github.com/mshahrfar/jupiter/blob/master/LICENSE
 //
 
-apply plugin: 'application'
-apply plugin: 'eclipse'
-apply plugin: 'jacoco'
-apply plugin: 'java'
+plugins {
+   id "application"
+   id "eclipse"
+   id "jacoco"
+   id "java"
+}
 
 version = '0.1'
-mainClassName = 'com.mshahrfar.jupiter.JupiterMain'
+mainClassName = 'com.ghorbanzade.jupiter.JupiterMain'
 
 repositories {
     mavenCentral()

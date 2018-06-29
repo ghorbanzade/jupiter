@@ -21,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.lang.ReflectiveOperationException;
 
 import java.nio.file.Paths;
-import java.nio.file.Path;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -155,6 +154,7 @@ public class JupiterMain {
                 doc.put("duration_total", (long) ride.get("duration"));
                 doc.put("distance_total", (long) ride.get("distance"));
 
+                @SuppressWarnings("unchecked")
                 List<Long> durations = (List<Long>) ride.get("durations");
                 doc.put("t_p1_p2", durations.get(0));
                 doc.put("t_p2_d2", durations.get(1));
@@ -162,6 +162,7 @@ public class JupiterMain {
                 doc.put("t_p2_d1", durations.get(3));
                 doc.put("t_d1_d2", durations.get(4));
 
+                @SuppressWarnings("unchecked")
                 List<Long> distances = (List<Long>) ride.get("distances");
                 doc.put("d_p1_p2", distances.get(0));
                 doc.put("d_p2_d2", distances.get(1));
