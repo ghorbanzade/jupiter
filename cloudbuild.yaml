@@ -1,9 +1,0 @@
-steps:
-- name: 'docker/compose:1.22.0'
-  args: ['build']
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'ghorbanzade/jupiter:latest',
-         'gcr.io/$PROJECT_ID/jupiter:latest']
-
-images:
-- 'gcr.io/$PROJECT_ID/jupiter:latest'
