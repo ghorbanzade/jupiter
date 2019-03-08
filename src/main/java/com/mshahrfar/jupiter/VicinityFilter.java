@@ -16,7 +16,7 @@ public class VicinityFilter implements Filter {
 
   private static final Config cfg = ConfigManager.get("config/main.properties");
 
-    int vicinity;
+  int vicinity;
 
   /**
    *
@@ -30,23 +30,23 @@ public class VicinityFilter implements Filter {
    *
    * @param vicinity
    */
-    public VicinityFilter(int vicinity) {
-        this.vicinity = vicinity;
-    }
+  public VicinityFilter(int vicinity) {
+    this.vicinity = vicinity;
+  }
 
-    /**
-     *
-     *
-     * @param customer
-     * @param candidate
-     * @return
-     */
-    public boolean pass(Customer customer, Customer candidate) {
-        Distance dist = new Distance(
-            customer.getPickupLocation(),
-            candidate.getPickupLocation()
-        );
-        return (dist.getShortestPath() < this.vicinity);
-    }
+  /**
+   *
+   *
+   * @param customer
+   * @param candidate
+   * @return
+   */
+  public boolean pass(Customer customer, Customer candidate) {
+    Distance dist = new Distance(
+        customer.getPickupLocation(),
+        candidate.getPickupLocation()
+    );
+    return (dist.getShortestPath() < this.vicinity);
+  }
 
 }

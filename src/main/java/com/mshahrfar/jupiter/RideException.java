@@ -15,13 +15,13 @@ package com.ghorbanzade.jupiter;
  */
 public final class RideException extends RuntimeException {
 
-    /**
-     *
-     *
-     * @param exp explanation for why the exception is thrown
-     */
-    public RideException(String exp) {
-        super(exp);
-    }
+  /**
+   *
+   *
+   * @param exp explanation for why the exception is thrown
+   */
+  public RideException(String exp) {
+    super(exp);
+  }
 
 }

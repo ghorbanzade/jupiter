@@ -14,32 +14,32 @@ package com.ghorbanzade.jupiter;
  */
 public class DurationSharePolicy implements SharePolicy {
 
-    private static final Config cfg = ConfigManager.get("config/main.properties");
-    private final Ride ride;
+  private static final Config cfg = ConfigManager.get("config/main.properties");
+  private final Ride ride;
 
-    /**
-     *
-     *
-     * @param ride
-     */
-    public DurationSharePolicy(Ride ride) {
-        this.ride = ride;
-    }
+  /**
+   *
+   *
+   * @param ride
+   */
+  public DurationSharePolicy(Ride ride) {
+    this.ride = ride;
+  }
 
-    /**
-     *
-     *
-     * @return
-     */
-    public boolean pass() {
-        long duration = (long) this.ride.get("duration");
-        double factor = cfg.getAsDouble("late.factor");
-        for (Customer customer: this.ride.getCustomers()) {
-            if (customer.getIndividualRideDuration() * factor < duration) {
-                return false;
-            }
-        }
-        return true;
+  /**
+   *
+   *
+   * @return
+   */
+  public boolean pass() {
+    long duration = (long) this.ride.get("duration");
+    double factor = cfg.getAsDouble("late.factor");
+    for (Customer customer: this.ride.getCustomers()) {
+      if (customer.getIndividualRideDuration() * factor < duration) {
+        return false;
+      }
     }
+    return true;
+  }
 
 }

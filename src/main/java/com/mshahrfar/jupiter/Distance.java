@@ -16,35 +16,35 @@ import com.google.maps.model.LatLng;
  */
 public class Distance {
 
-    private LatLng src;
-    private LatLng dst;
+  private LatLng src;
+  private LatLng dst;
 
-    private static final int EARTH_RADIUS = 6371000; // radius of the earth
+  private static final int EARTH_RADIUS = 6371000; // radius of the earth
 
-    /**
-     *
-     *
-     * @param src
-     * @param dst
-     */
-    public Distance(LatLng src, LatLng dst) {
-        this.src = src;
-        this.dst = dst;
-    }
+  /**
+   *
+   *
+   * @param src
+   * @param dst
+   */
+  public Distance(LatLng src, LatLng dst) {
+    this.src = src;
+    this.dst = dst;
+  }
 
-    /**
-     *
-     *
-     * @return
-     */
-    public double getShortestPath() {
-        double dLat = Math.toRadians(dst.lat - src.lat);
-        double dLng = Math.toRadians(dst.lng - src.lng);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(Math.toRadians(src.lat)) * Math.cos(Math.toRadians(dst.lat))
-                * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-        double ret = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * EARTH_RADIUS;
-        return ret;
-    }
+  /**
+   *
+   *
+   * @return
+   */
+  public double getShortestPath() {
+    double dLat = Math.toRadians(dst.lat - src.lat);
+    double dLng = Math.toRadians(dst.lng - src.lng);
+    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+            + Math.cos(Math.toRadians(src.lat)) * Math.cos(Math.toRadians(dst.lat))
+            * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    double ret = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * EARTH_RADIUS;
+    return ret;
+  }
 
 }

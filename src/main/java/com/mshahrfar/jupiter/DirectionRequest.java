@@ -7,33 +7,33 @@
 
 package com.ghorbanzade.jupiter;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoCollection;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
+import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.LatLng;
 import com.google.maps.model.TravelMode;
-import com.google.maps.DirectionsApiRequest;
-import com.google.maps.errors.ApiException;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import org.bson.Document;
 
 import org.joda.time.DateTime;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -46,13 +46,13 @@ public class DirectionRequest {
   private static final Logger log = Logger.getLogger(DatasetParser.class);
   private static final Config cfg = ConfigManager.get("config/main.properties");
 
-    private static final GeoApiContext context = new GeoApiContext()
-        .setApiKey(cfg.getAsString("google.maps.api.key"));
+  private static final GeoApiContext context = new GeoApiContext()
+      .setApiKey(cfg.getAsString("google.maps.api.key"));
 
-    private static final Gson gsonRequest = new Gson();
-    private static final Gson gsonResult = (new GsonBuilder())
-        .setExclusionStrategies(new DirectionsResultExclusionStrategy())
-        .create();
+  private static final Gson gsonRequest = new Gson();
+  private static final Gson gsonResult = (new GsonBuilder())
+      .setExclusionStrategies(new DirectionsResultExclusionStrategy())
+      .create();
 
   private final DirectionsApiRequest request = DirectionsApi.newRequest(context);
   private final Map<String, Object> info = new HashMap<String, Object>();
@@ -82,8 +82,8 @@ public class DirectionRequest {
   public DirectionsResult getResult() {
     DirectionsResult result = this.getResultFromDb();
     if (null != result) {
-        log.trace("request found in database");
-        return result;
+      log.trace("request found in database");
+      return result;
     }
     result = this.getResultFromApi();
     log.trace("received result from google directions api");
@@ -104,9 +104,9 @@ public class DirectionRequest {
       throw new RideException("daily query cap reached");
     }
     try {
-        this.request.departureTime(new DateTime(
-            this.info.get("departure_time")
-        ));
+      this.request.departureTime(new DateTime(
+          this.info.get("departure_time")
+      ));
       this.request.origin((LatLng) this.info.get("origin"));
       this.request.destination((LatLng) this.info.get("destination"));
       this.request.waypoints((LatLng[]) this.info.get("waypoints"));
@@ -125,25 +125,25 @@ public class DirectionRequest {
    * @return
    */
   private DirectionsResult getResultFromDb() {
-        DirectionsResult result = null;
-        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
-        MongoDatabase db = client.getDatabase("jupiter");
-        MongoCollection<Document> collection = db.getCollection("api");
-        BasicDBObject query = new BasicDBObject(
-            "request", gsonRequest.toJson(this.info)
+    DirectionsResult result = null;
+    MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+    MongoDatabase db = client.getDatabase("jupiter");
+    MongoCollection<Document> collection = db.getCollection("api");
+    BasicDBObject query = new BasicDBObject(
+        "request", gsonRequest.toJson(this.info)
+    );
+    MongoCursor<Document> cursor = collection.find(query).iterator();
+    try {
+      if (cursor.hasNext()) {
+        result = (DirectionsResult) gsonResult.fromJson(
+            (String) cursor.next().get("result"),
+            DirectionsResult.class
         );
-        MongoCursor<Document> cursor = collection.find(query).iterator();
-        try {
-            if (cursor.hasNext()) {
-                result = (DirectionsResult) gsonResult.fromJson(
-                    (String) cursor.next().get("result"),
-                    DirectionsResult.class
-                );
-            }
-        } finally {
-            cursor.close();
-        }
-        return result;
+      }
+    } finally {
+      cursor.close();
+    }
+    return result;
   }
 
   /**
@@ -152,19 +152,19 @@ public class DirectionRequest {
    * @param result
    */
   public void addToDb(DirectionsResult result) {
-        log.trace("adding google directions api result to the database");
+    log.trace("adding google directions api result to the database");
 
-        String requestStr = gsonRequest.toJson(this.info);
-        String resultStr = gsonResult.toJson(result);
+    String requestStr = gsonRequest.toJson(this.info);
+    String resultStr = gsonResult.toJson(result);
 
-        MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
-        MongoDatabase db = client.getDatabase("jupiter");
-        MongoCollection<Document> collection = db.getCollection("api");
-        Document doc = new Document();
-        doc.put("request", requestStr);
-        doc.put("result", resultStr);
-        collection.insertOne(doc);
-        log.trace("added google directions api result to the database");
+    MongoClient client = (MongoClient) ResourceManager.get("mongo_client");
+    MongoDatabase db = client.getDatabase("jupiter");
+    MongoCollection<Document> collection = db.getCollection("api");
+    Document doc = new Document();
+    doc.put("request", requestStr);
+    doc.put("result", resultStr);
+    collection.insertOne(doc);
+    log.trace("added google directions api result to the database");
   }
 
 }

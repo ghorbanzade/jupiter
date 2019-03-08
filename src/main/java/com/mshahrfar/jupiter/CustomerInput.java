@@ -15,40 +15,40 @@ import java.util.List;
  */
 public interface CustomerInput {
 
-    /**
-     *
-     *
-     * @return true if input has a customer that has not been handled yet and
-     *         false otherwise
-     */
-    public boolean hasCustomer();
+  /**
+   *
+   *
+   * @return true if input has a customer that has not been handled yet and
+   *         false otherwise
+   */
+  public boolean hasCustomer();
 
-    /**
-     *
-     *
-     * @return
-     */
-    public Customer nextCustomer();
+  /**
+   *
+   *
+   * @return
+   */
+  public Customer nextCustomer();
 
-    /**
-     *
-     *
-     * @return
-     */
-    public List<Customer> getCandidates();
+  /**
+   *
+   *
+   * @return
+   */
+  public List<Customer> getCandidates();
 
-    /**
-     *
-     *
-     * @param filter
-     */
-    public void addFilter(Filter filter);
+  /**
+   *
+   *
+   * @param filter
+   */
+  public void addFilter(Filter filter);
 
-    /**
-     *
-     *
-     * @param candidate
-     */
-    public void excludeCandidate(Customer candidate);
+  /**
+   *
+   *
+   * @param candidate
+   */
+  public void excludeCandidate(Customer candidate);
 
 }

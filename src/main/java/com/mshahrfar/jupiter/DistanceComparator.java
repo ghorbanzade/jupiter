@@ -20,19 +20,19 @@ import java.util.Comparator;
 */
 public class DistanceComparator implements Comparator<Ride>, Serializable {
 
-    /**
-     * Comparison rule for comparing two Ride objects. In this comparator, a
-     * ride is considered as favorable if its total distance is less than
-     * that of the other.
-     *
-     * @param ride1 the ride we are comparing against
-     * @param ride2 the ride we are comparing with
-     */
-    @Override
-    public int compare(Ride ride1, Ride ride2) {
-        long dist1 = (long) ride1.get("distance");
-        long dist2 = (long) ride2.get("distance");
-        return Long.compare(dist1, dist2);
-    }
+  /**
+   * Comparison rule for comparing two Ride objects. In this comparator, a
+   * ride is considered as favorable if its total distance is less than
+   * that of the other.
+   *
+   * @param ride1 the ride we are comparing against
+   * @param ride2 the ride we are comparing with
+   */
+  @Override
+  public int compare(Ride ride1, Ride ride2) {
+    long dist1 = (long) ride1.get("distance");
+    long dist2 = (long) ride2.get("distance");
+    return Long.compare(dist1, dist2);
+  }
 
 }

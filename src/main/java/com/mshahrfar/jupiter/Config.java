@@ -7,8 +7,6 @@
 
 package com.ghorbanzade.jupiter;
 
-import org.apache.log4j.Logger;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,6 +14,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import org.apache.log4j.Logger;
 
 /**
  * This class allows defining configuration parameters in a separate properties

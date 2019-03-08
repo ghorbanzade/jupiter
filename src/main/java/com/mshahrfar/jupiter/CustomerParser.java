@@ -15,28 +15,28 @@ package com.ghorbanzade.jupiter;
  */
 public interface CustomerParser {
 
-    /**
-     * Checks whether parser has any remaining entries to parse.
-     *
-     * @return true if parser still has customers to parse
-     */
-    public boolean hasNext();
+  /**
+   * Checks whether parser has any remaining entries to parse.
+   *
+   * @return true if parser still has customers to parse
+   */
+  public boolean hasNext();
 
-    /**
-     * Reads a new entry and creates a Customer object based on its
-     * inforamtion.
-     *
-     * @return next customers in the parser or null if none remains
-     * @throws CustomerException if there are no more customers.
-     *         A good client always checks hasNext() before calling
-     *         this function.
-     */
-    public Customer next() throws CustomerException;
+  /**
+   * Reads a new entry and creates a Customer object based on its
+   * inforamtion.
+   *
+   * @return next customers in the parser or null if none remains
+   * @throws CustomerException if there are no more customers.
+   *         A good client always checks hasNext() before calling
+   *         this function.
+   */
+  public Customer next() throws CustomerException;
 
-    /**
-     * Cleans up parser resources. Client is expected to call this method
-     * when it is done with the parser.
-     */
-    public void close();
+  /**
+   * Cleans up parser resources. Client is expected to call this method
+   * when it is done with the parser.
+   */
+  public void close();
 
 }

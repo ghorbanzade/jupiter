@@ -16,13 +16,13 @@ import java.util.List;
  */
 public interface Filter {
 
-    /**
-     *
-     *
-     * @param customer
-     * @param candidate
-     * @return
-     */
-    public boolean pass(Customer customer, Customer candidate);
+  /**
+   *
+   *
+   * @param customer
+   * @param candidate
+   * @return
+   */
+  public boolean pass(Customer customer, Customer candidate);
 
 }
