@@ -6,17 +6,19 @@
 //
 
 plugins {
-   id "application"
-   id "eclipse"
-   id "jacoco"
-   id "java"
+    id "application"
+    id "checkstyle"
+    id "java"
+    id "jacoco"
+    id "pmd"
+    id "com.github.spotbugs" version "1.6.9"
 }
 
 version = '0.1'
 mainClassName = 'com.ghorbanzade.jupiter.JupiterMain'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -59,15 +61,60 @@ task myJavadocs(type: Javadoc) {
 }
 
 jacoco {
-  toolVersion = '0.7.6.201602180812'
+  toolVersion = '0.8.3'
+}
+
+checkstyle {
+    toolVersion = '8.18'
+    ignoreFailures = false
+}
+
+pmd {
+    toolVersion = '6.12.0'
+    ignoreFailures = true
+}
+
+spotbugs {
+    toolVersion = '3.1.12'
+    ignoreFailures = true
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+
+tasks.withType(Pmd) {
+    ruleSets = [
+        "category/java/design.xml",
+        "category/java/codestyle.xml",
+        "category/java/bestpractices.xml"
+    ]
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
 }
 
 jacocoTestReport {
-  reports {
-    xml.enabled true
-    csv.enabled false
-    html.enabled true
-  }
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.enabled true
+    }
+}
+
+run {
+  standardInput = System.in
 }
 
 clean {
