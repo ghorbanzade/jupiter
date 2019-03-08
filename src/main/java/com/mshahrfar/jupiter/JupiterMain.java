@@ -1,11 +1,11 @@
 //
 // Jupiter: A Ride-Sharing Network Generation and Analysis Application
-// Copyright 2017 Mariam Shahrabifarahani <mshahrfar@gmail.com>
+// Copyright 2017 Pejman Ghorbanzade <pejman@ghorbanzade.com>
 // Released under the terms of MIT License
-// https://github.com/mshahrfar/jupiter/blob/master/LICENSE
+// https://github.com/ghorbanzade/jupiter/blob/master/LICENSE
 //
 
-package com.mshahrfar.jupiter;
+package com.ghorbanzade.jupiter;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -72,7 +72,7 @@ public class JupiterMain {
         List<String> items = Arrays.asList(filters.split("\\s*,\\s*"));
         for (String item: items) {
           String filter = String.format(
-            "com.mshahrfar.jupiter.%sFilter", item
+            "com.ghorbanzade.jupiter.%sFilter", item
           );
           try {
             Class<?> cls = Class.forName(filter);
